@@ -5,29 +5,51 @@ using HermesLibrary.Devices.Ant.Messages.Device;
 
 namespace HermesLibrary.Devices.Ant.Channel;
 
-public class Channel
+public class Channel : IAntChannel
 {
-    private IAnt mDevice;
+    private IAntTransmitter? mTransmitter;
 
-    public Channel(byte number, byte networkNumber, ChannelType type)
+    public Channel()
+    {
+    }
+
+    public Channel(byte number, byte networkNumber, ChannelType type, ExtendedAssignmentType extendedAssignment,
+        ushort period, byte frequency)
     {
         Number = number;
         NetworkNumber = networkNumber;
         Type = type;
+        ExtendedAssignment = extendedAssignment;
+        Period = period;
+        Frequency = frequency;
     }
 
-    public byte Number { get; init; }
-    public byte NetworkNumber { get; init; }
-    public ChannelType Type { get; init; }
-    public ExtendedAssignmentType ExtendedAssignment { get; set; } = ExtendedAssignmentType.UNKNOWN;
-    public ushort Period { get; set; }
-    public byte Frequency { get; set; }
+    /// <inheritdoc />
+    public byte Number { get; } = 0;
 
-    public async Task Open(IAnt inter, IAntTransmitter device)
+    /// <inheritdoc />
+    public byte NetworkNumber { get; } = 0;
+
+    /// <inheritdoc />
+    public ChannelType Type { get; } = ChannelType.ReceiveChannel;
+
+    /// <inheritdoc />
+    public ExtendedAssignmentType ExtendedAssignment { get; } = ExtendedAssignmentType.UNKNOWN;
+
+    /// <inheritdoc />
+    public ushort Period { get; } = 0x2000;
+
+    /// <inheritdoc />
+    public byte Frequency { get; } = 0x03;
+
+    public async Task Open(IAntTransmitter transmitter)
     {
-        if (mDevice != null) await Close();
+        if (transmitter == null)
+            throw new ArgumentNullException(nameof(transmitter));
 
-        mDevice = inter;
+        if (mTransmitter != null) await Close();
+
+        mTransmitter = transmitter;
         var result = (await mDevice.AwaitMessageOfTypeAsync<EventResponseMessage>(
             new AssignChannelMessage(Number, Type, NetworkNumber, ExtendedAssignment))).Type;
 
