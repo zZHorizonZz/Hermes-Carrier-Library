@@ -25,10 +25,10 @@ public class Channel : IAntChannel
     }
 
     /// <inheritdoc />
-    public byte Number { get; set; } = 0;
+    public byte Number { get; set; }
 
     /// <inheritdoc />
-    public byte NetworkNumber { get; set; } = 0;
+    public byte NetworkNumber { get; set; }
 
     /// <inheritdoc />
     public ChannelType Type { get; set; } = ChannelType.ReceiveChannel;
@@ -43,69 +43,29 @@ public class Channel : IAntChannel
     public byte Frequency { get; set; } = 0x03;
 
     /// <inheritdoc />
-    public ushort DeviceNumber { get; set; }
-
-    /// <inheritdoc />
-    public bool IsSlave { get; set; }
-
-    /// <inheritdoc />
-    public byte DeviceType { get; set; }
-
-    /// <inheritdoc />
-    public byte TransmissionType { get; set; }
-
-    public async Task Open(IAntTransmitter transmitter)
+    public async Task AssignChannel(IAntTransmitter transmitter)
     {
-        Console.WriteLine("Opening channel");
-        if (transmitter == null)
-            throw new ArgumentNullException(nameof(transmitter));
-
-        Console.WriteLine("Assigning channel");
-        if (mTransmitter != null) await Close();
-
-        Console.WriteLine("Assigning channel");
         mTransmitter = transmitter;
+
         var result =
-            (await AwaitMessageOfTypeAsync<EventResponseMessage>(new AssignChannelMessage(Type, NetworkNumber,
+            (await AwaitMessageOfTypeAsync<EventResponseMessage>(new AssignChannelMessage(
+                Type,
+                NetworkNumber,
                 ExtendedAssignment))).Type;
 
-        Console.WriteLine("Assigning channel");
         if (result != EventResponseType.RESPONSE_NO_ERROR)
         {
             Console.WriteLine($"Failed to assign channel {result}");
             return;
         }
 
-        result = (await AwaitMessageOfTypeAsync<EventResponseMessage>(new SetChannelIdMessage(DeviceNumber,
-            IsSlave,
-            DeviceType,
-            TransmissionType))).Type;
+        Console.WriteLine("Channel assigned");
+    }
 
-        if (result != EventResponseType.RESPONSE_NO_ERROR)
-        {
-            Console.WriteLine($"Failed to set channel id {result}");
-            return;
-        }
-
-        result = (await AwaitMessageOfTypeAsync<EventResponseMessage>(new ChannelMessagingPeriodMessage(Period)))
-            .Type;
-
-        if (result != EventResponseType.RESPONSE_NO_ERROR)
-        {
-            Console.WriteLine($"Failed to set channel period {result}");
-            return;
-        }
-
-        result = (await AwaitMessageOfTypeAsync<EventResponseMessage>(new ChannelRFFrequencyMessage(Frequency)))
-            .Type;
-
-        if (result != EventResponseType.RESPONSE_NO_ERROR)
-        {
-            Console.WriteLine($"Failed to set channel frequency {result}");
-            return;
-        }
-
-        result = (await AwaitMessageOfTypeAsync<EventResponseMessage>(new OpenChannelMessage())).Type;
+    public async Task Open()
+    {
+        var result = (await AwaitMessageOfTypeAsync<EventResponseMessage>(new OpenChannelMessage())).Type;
+        Console.WriteLine($"Result: {result}");
         if (result != EventResponseType.RESPONSE_NO_ERROR)
         {
             Console.WriteLine($"Failed to open channel {result}");
@@ -137,6 +97,7 @@ public class Channel : IAntChannel
     /// <inheritdoc />
     public async Task<IAntMessage> AwaitMessageAsync(IAntMessage message)
     {
+        Console.WriteLine("Awaiting message");
         if (mTransmitter == null)
             throw new InvalidOperationException("Channel is not open");
 
@@ -149,7 +110,7 @@ public class Channel : IAntChannel
     {
         if (mTransmitter == null)
             throw new InvalidOperationException("Channel is not open");
-
+        
         message.ChannelNumber = Number;
         return await mTransmitter.AwaitMessageOfTypeAsync<T>(message);
     }

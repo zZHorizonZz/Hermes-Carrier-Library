@@ -17,8 +17,15 @@ public class AntDongleTransmitter : IAntTransmitter
     {
         mDevice = device;
 
-        //TODO This can not work since device maybe already opened
-        device.Opened += OnOpen;
+        if (device.IsConnected)
+        {
+            StartReadThread();
+        }
+        else
+        {
+            device.Opened += OnOpen;
+        }
+
         device.Closed += OnClose;
     }
 
@@ -37,12 +44,10 @@ public class AntDongleTransmitter : IAntTransmitter
     /// <inheritdoc />
     public async Task OpenChannelAsync(IAntChannel channel)
     {
-        Console.WriteLine($"Opening channel {channel.Number}");
         if (ActiveChannels.ContainsKey(channel.Number))
             throw new Exception("Channel already open");
 
-        Console.WriteLine($"Opening channel {channel.Number}");
-        await channel.Open(this);
+        await channel.Open();
         ActiveChannels.Add(channel.Number, channel);
     }
 
@@ -54,16 +59,6 @@ public class AntDongleTransmitter : IAntTransmitter
 
         await channel.Close();
         ActiveChannels.Remove(channel.Number);
-    }
-
-    public void OnOpen(object? sender, System.EventArgs e)
-    {
-        StartReadThread();
-    }
-
-    public void OnClose(object? sender, System.EventArgs e)
-    {
-        // TODO: Implement
     }
 
     /// <inheritdoc />
@@ -78,13 +73,9 @@ public class AntDongleTransmitter : IAntTransmitter
         var tcs = new TaskCompletionSource<IAntMessage>();
         mAwaitingMessages.Add(message, tcs);
 
-        Console.WriteLine($"Awaiting response for message type {message.MessageId:X2}");
-
         await SendMessageAsync(message);
 
         var response = await tcs.Task;
-
-        Console.WriteLine($"Received response for message type {message.MessageId:X2}");
         return response;
     }
 
@@ -107,6 +98,16 @@ public class AntDongleTransmitter : IAntTransmitter
         if (message is not UnknownMessage) message.Decode(data);
 
         return Task.FromResult(message);
+    }
+
+    public void OnOpen(object? sender, System.EventArgs e)
+    {
+        StartReadThread();
+    }
+
+    public void OnClose(object? sender, System.EventArgs e)
+    {
+        // TODO: Implement
     }
 
     private IAntMessage DecodeMessage(byte[] data)
@@ -137,6 +138,12 @@ public class AntDongleTransmitter : IAntTransmitter
 
                 source.SetResult(message);
             }
+
+            if (message is UnknownMessage)
+                Console.WriteLine(message);
+
+            if (message is AcknowledgedDataMessage acknowledgedDataMessage)
+                Console.WriteLine(acknowledgedDataMessage);
         }
     }
 }

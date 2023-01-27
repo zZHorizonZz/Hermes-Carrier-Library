@@ -12,19 +12,30 @@ public class AntService : IAntService
 {
     public static readonly IAntMessage[] ClientBoundMessages =
     {
-        new ResetSystemMessage(),
-        new OpenRxScanMode(),
+        new AcknowledgedDataMessage(),
         new AssignChannelMessage(),
+        new BroadcastDataMessage(),
+        new ChannelMessagingPeriodMessage(),
+        new ChannelRFFrequencyMessage(),
+        new CloseChannelMessage(),
+        new OpenChannelMessage(),
+        new OpenRxScanMode(),
+        new RequestMessage(),
+        new ResetSystemMessage(),
+        new SetChannelIdMessage(),
         new SetNetworkKeyMessage(),
-        new RequestMessage()
+        new UnAssignChannelMessage(),
     };
 
     public static readonly IAntMessage[] DeviceBoundMessages =
     {
-        new StartUpMessage(),
+        new AcknowledgedDataMessage(),
+        new AntVersionMessage(),
         new EventResponseMessage(),
-        new AntVersionMessage()
+        new StartUpMessage(),
     };
+
+    private readonly WeakEventManager mTransmitterStatusChangedEventManager = new();
 
     private readonly IUsbService mUsbService;
 
@@ -35,8 +46,6 @@ public class AntService : IAntService
 
     /// <inheritdoc />
     public IAntTransmitter CurrentTransmitter { get; set; }
-
-    private readonly WeakEventManager mTransmitterStatusChangedEventManager = new();
 
     /// <inheritdoc />
     public event EventHandler<AntTransmitterStatusChangedEventArgs> TransmitterStatusChanged

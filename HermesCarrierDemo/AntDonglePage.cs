@@ -1,13 +1,15 @@
-﻿using HermesLibrary.Devices;
-using HermesLibrary.Devices.Ant.EventArgs;
-using Microsoft.Maui.Controls.Shapes;
+﻿using HermesCarrierDemo;
+using HermesCarrierLibrary.Devices;
+using HermesCarrierLibrary.Devices.Ant.Channel;
+using HermesCarrierLibrary.Devices.Ant.Enum;
+using HermesCarrierLibrary.Devices.Ant.EventArgs;
 
 namespace Demo;
 
 public class AntDonglePage : ContentPage
 {
-    private readonly DeviceService mDeviceService;
     private readonly Label mDevicesCountLabel;
+    private readonly DeviceService mDeviceService;
     private readonly Span mStatusSpan;
 
     public AntDonglePage()
@@ -20,7 +22,7 @@ public class AntDonglePage : ContentPage
             TextColor = Colors.White,
             FontSize = 24,
             FontAttributes = FontAttributes.Bold,
-            FormattedText = new FormattedString()
+            FormattedText = new FormattedString
             {
                 Spans =
                 {
@@ -48,5 +50,18 @@ public class AntDonglePage : ContentPage
     {
         mStatusSpan.Text = e.Transmitter.IsConnected ? "Connected" : "Disconnected";
         mStatusSpan.TextColor = e.Transmitter.IsConnected ? Color.FromArgb("#00FF00") : Color.FromArgb("#FF0000");
+
+        if (e.Transmitter.IsConnected)
+        {
+            ThreadPool.QueueUserWorkItem(_ =>
+            {
+                var transmitter = e.Transmitter;
+                var channel = new Channel(0, 1, ChannelType.TransmitChannel, ExtendedAssignmentType.UNKNOWN, 0x2000,
+                    0x03);
+
+                var testDevice = new TestDevice();
+                testDevice.Open(transmitter, channel).ConfigureAwait(false);
+            });
+        }
     }
 }

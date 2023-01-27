@@ -1,20 +1,20 @@
-﻿using Android.Content;
+﻿using Application = Android.App.Application;
 
 namespace HermesCarrierLibrary.Platforms.Android.Devices;
 
 public class AndroidDeviceService
 {
-    public static AndroidDeviceService? Current { get; }
-
     static AndroidDeviceService()
     {
         Current = new AndroidDeviceService();
 
-        var context = Android.App.Application.Context;
+        var context = Application.Context;
 
         Current.UsbService = new AndroidUsbService(context);
         Current.UsbService.Register();
     }
+
+    public static AndroidDeviceService? Current { get; }
 
     public AndroidUsbService? UsbService { get; private set; }
 }

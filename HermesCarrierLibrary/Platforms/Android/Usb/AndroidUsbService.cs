@@ -2,7 +2,6 @@
 using Android.Content;
 using Android.Hardware.Usb;
 using HermesCarrierLibrary.Devices.Shared;
-using QuickStat.Platforms.Android.Devices.Ant.Dongle;
 
 namespace HermesCarrierLibrary.Platforms.Android.Devices;
 
@@ -57,7 +56,6 @@ public class AndroidUsbService : IUsbService
         var devices = mUsbManager.DeviceList.Values;
 
         foreach (var device in devices)
-        {
             if (mDevices.TryGetValue(device.DeviceId, out var value))
             {
                 yield return value;
@@ -68,7 +66,6 @@ public class AndroidUsbService : IUsbService
                 mDevices.Add(device.DeviceId, serial);
                 yield return serial;
             }
-        }
     }
 
     public void Register()

@@ -3,7 +3,6 @@ using Android.Hardware.Usb;
 using HermesCarrierLibrary.Devices.Shared;
 using HermesCarrierLibrary.Platforms.Android.Devices.Util;
 using Java.Nio;
-using QuickStat.Platforms.Android.Devices.Ant.Dongle.Util;
 using Buffer = System.Buffer;
 
 namespace HermesCarrierLibrary.Platforms.Android.Devices;
@@ -148,7 +147,7 @@ public class UsbSerial : ISerial
         mUsbRequestIn.Initialize(mUsbDeviceConnection, mUsbEndpointIn);
         IsConnected = true;
 
-        mOpenEventManager.HandleEvent(this, System.EventArgs.Empty, nameof(Opened));
+        mOpenEventManager.HandleEvent(this, EventArgs.Empty, nameof(Opened));
     }
 
     public void Close()
@@ -159,6 +158,6 @@ public class UsbSerial : ISerial
         mUsbDeviceConnection.Close();
         IsConnected = false;
 
-        mCloseEventManager.HandleEvent(this, System.EventArgs.Empty, nameof(Closed));
+        mCloseEventManager.HandleEvent(this, EventArgs.Empty, nameof(Closed));
     }
 }

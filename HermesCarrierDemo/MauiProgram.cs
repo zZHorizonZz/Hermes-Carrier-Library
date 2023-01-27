@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-
-namespace HermesCarrierDemo;
+﻿namespace HermesCarrierDemo;
 
 public static class MauiProgram
 {

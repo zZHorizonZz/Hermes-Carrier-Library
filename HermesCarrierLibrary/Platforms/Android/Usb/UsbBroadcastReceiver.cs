@@ -1,6 +1,5 @@
 ﻿using Android.Content;
 using Android.Hardware.Usb;
-using QuickStat.Devices.Usb;
 
 namespace HermesCarrierLibrary.Platforms.Android.Devices;
 

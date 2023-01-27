@@ -16,7 +16,8 @@ public class AcknowledgedDataMessage : AntMessage
     /// <inheritdoc />
     public override void DecodePayload(BinaryReader payload)
     {
-        throw new NotImplementedException();
+        ChannelNumber = payload.ReadByte();
+        Data = payload.ReadBytes(8);
     }
 
     /// <inheritdoc />
@@ -26,5 +27,11 @@ public class AcknowledgedDataMessage : AntMessage
         writer.Write(ChannelNumber);
         writer.Write(Data);
         return writer;
+    }
+
+    /// <inheritdoc />
+    public override string ToString()
+    {
+        return $"AcknowledgedDataMessage: ChannelNumber={ChannelNumber}, Data={BitConverter.ToString(Data)}";
     }
 }

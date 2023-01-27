@@ -8,8 +8,7 @@ using HermesCarrierLibrary.Devices.Ant.Messages.Client;
 using HermesCarrierLibrary.Devices.Ant.Util;
 using HermesCarrierLibrary.Devices.Shared;
 #if ANDROID
-using QuickStat.Devices;
-using QuickStat.Platforms.Android.Devices.Ant.Dongle;
+using HermesCarrierLibrary.Platforms.Android.Devices;
 #endif
 
 namespace HermesCarrierLibrary.Devices;
@@ -62,26 +61,22 @@ public class DeviceService
 
         Task.Run(async () =>
         {
-            Console.WriteLine("OnConnectSerial - Task.Run");
             await transmitter.SendMessageAsync(new ResetSystemMessage());
-            Console.WriteLine("OnConnectSerial - Task.Run - ResetSystemMessage");
             Thread.Sleep(500);
             await transmitter.SendMessageAsync(new SetNetworkKeyMessage(1,
                 new byte[] { 0xF9, 0xED, 0x22, 0xB8, 0xFD, 0x56, 0x67, 0xCD }));
-            Console.WriteLine("OnConnectSerial - Task.Run - SetNetworkKeyMessage");
             var channel = new Channel(0, 1, ChannelType.TransmitChannel, ExtendedAssignmentType.UNKNOWN, 0x2000,
                 0x03);
 
-            Console.WriteLine("OnConnectSerial - Task.Run - OpenChannelAsync");
             await transmitter.OpenChannelAsync(channel);
 
-            Console.WriteLine("OnConnectSerial - Task.Run - OpenChannelAsync - End");
             Thread.Sleep(500);
             var lastAcknowledgeTime = DateTime.Now;
             while (transmitter.IsConnected)
             {
                 if (DateTime.Now > lastAcknowledgeTime.AddSeconds(1))
                 {
+                    Console.WriteLine("Sending Acknowledge");
                     await channel.SendMessageAsync(new AcknowledgedDataMessage(new byte[]
                         { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }));
                     lastAcknowledgeTime = DateTime.Now;

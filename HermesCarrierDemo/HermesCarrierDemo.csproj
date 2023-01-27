@@ -53,7 +53,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\HermesLibrary\HermesLibrary.csproj" />
+        <ProjectReference Include="..\HermesCarrierLibrary\HermesCarrierLibrary.csproj" />
     </ItemGroup>
 
 </Project>

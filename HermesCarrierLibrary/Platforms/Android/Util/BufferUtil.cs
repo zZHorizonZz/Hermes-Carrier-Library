@@ -25,7 +25,8 @@ public static class BufferUtil
             _byteBufferGetBii = JNIEnv.GetMethodID(_byteBufferClassRef, "get", "([BII)Ljava/nio/ByteBuffer;");
 
         return Object.GetObject<ByteBuffer>(
-            JNIEnv.CallObjectMethod(buffer.Handle, _byteBufferGetBii, new(dst), new(dstOffset), new(byteCount)),
+            JNIEnv.CallObjectMethod(buffer.Handle, _byteBufferGetBii, new JValue(dst), new JValue(dstOffset),
+                new JValue(byteCount)),
             JniHandleOwnership.TransferLocalRef);
     }
 
