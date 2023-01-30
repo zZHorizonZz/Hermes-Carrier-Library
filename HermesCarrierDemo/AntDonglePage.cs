@@ -1,22 +1,23 @@
-﻿using HermesCarrierDemo;
-using HermesCarrierLibrary.Devices;
-using HermesCarrierLibrary.Devices.Ant.Channel;
-using HermesCarrierLibrary.Devices.Ant.Enum;
-using HermesCarrierLibrary.Devices.Ant.EventArgs;
+﻿using CommunityToolkit.Maui.Markup;
+using HermesCarrierDemo;
 
 namespace Demo;
 
 public class AntDonglePage : ContentPage
 {
     private readonly Label mDevicesCountLabel;
-    private readonly DeviceService mDeviceService;
     private readonly Span mStatusSpan;
+    private readonly AntDongleViewModel mViewModel = new();
+    private readonly VerticalStackLayout mValuesListView;
 
     public AntDonglePage()
     {
-        mDeviceService = new DeviceService();
+        BindingContext = mViewModel;
 
-        mStatusSpan = new Span { Text = "Disconnected", TextColor = Color.FromArgb("#FF0000") };
+        mStatusSpan =
+            new Span { TextColor = Color.FromArgb("#FF0000") }
+                .Bind(Span.TextProperty, nameof(mViewModel.Status))
+                .Bind(Span.TextColorProperty, nameof(mViewModel.StatusColor));
         mDevicesCountLabel = new Label
         {
             TextColor = Colors.White,
@@ -39,29 +40,74 @@ public class AntDonglePage : ContentPage
             BackgroundColor = Color.FromArgb("#37505C"),
             Children =
             {
-                mDevicesCountLabel
+                mDevicesCountLabel,
+                new Entry { Placeholder = "Device number", TextColor = Colors.White }.Bind(Entry.TextProperty,
+                    nameof(mViewModel.DeviceNumber)),
+                new Entry { Placeholder = "Device type", TextColor = Colors.White }.Bind(Entry.TextProperty,
+                    nameof(mViewModel.DeviceType)),
+                new Entry { Placeholder = "Transmission type", TextColor = Colors.White }.Bind(Entry.TextProperty,
+                    nameof(mViewModel.TransmissionType)),
+                new Button
+                {
+                    Text = "Connect", TextColor = Colors.White, BackgroundColor = Color.FromArgb("#FF0000"),
+                    Command = mViewModel.ConnectCommand
+                },
+                new ScrollView()
+                {
+                    Content = new VerticalStackLayout().Assign(out mValuesListView)
+                }
             }
         };
 
-        mDeviceService.AntService.TransmitterStatusChanged += OnTransmitterStatusChanged;
+        mViewModel.ValueReceived += OnValueReceived;
     }
 
-    private void OnTransmitterStatusChanged(object sender, AntTransmitterStatusChangedEventArgs e)
+    private void OnValueReceived(object sender, TestDevice.ValueReceivedEventArgs e)
     {
-        mStatusSpan.Text = e.Transmitter.IsConnected ? "Connected" : "Disconnected";
-        mStatusSpan.TextColor = e.Transmitter.IsConnected ? Color.FromArgb("#00FF00") : Color.FromArgb("#FF0000");
+        MainThread.BeginInvokeOnMainThread(() => { mValuesListView.Add(new ValueView(e.Value, e.Unit)); });
+    }
 
-        if (e.Transmitter.IsConnected)
+    private class ValueView : ContentView
+    {
+        public ValueView(float value, byte unit)
         {
-            ThreadPool.QueueUserWorkItem(_ =>
+            Content = new StackLayout
             {
-                var transmitter = e.Transmitter;
-                var channel = new Channel(0, 1, ChannelType.TransmitChannel, ExtendedAssignmentType.UNKNOWN, 0x2000,
-                    0x03);
-
-                var testDevice = new TestDevice();
-                testDevice.Open(transmitter, channel).ConfigureAwait(false);
-            });
+                HorizontalOptions = LayoutOptions.Fill,
+                Padding = 16,
+                BackgroundColor = Color.FromArgb("#37505C"),
+                Children =
+                {
+                    new Label
+                    {
+                        TextColor = Colors.White,
+                        FontSize = 24,
+                        FontAttributes = FontAttributes.Bold,
+                        FormattedText = new FormattedString
+                        {
+                            Spans =
+                            {
+                                new Span { Text = "Value: ", TextColor = Color.FromArgb("#FFEAD0") },
+                                new Span { Text = value.ToString(), TextColor = Color.FromArgb("#FF0000") }
+                            }
+                        }
+                    },
+                    new Label
+                    {
+                        TextColor = Colors.White,
+                        FontSize = 24,
+                        FontAttributes = FontAttributes.Bold,
+                        FormattedText = new FormattedString
+                        {
+                            Spans =
+                            {
+                                new Span { Text = "Unit: ", TextColor = Color.FromArgb("#FFEAD0") },
+                                new Span { Text = unit.ToString(), TextColor = Color.FromArgb("#FF0000") }
+                            }
+                        }
+                    }
+                }
+            };
         }
     }
 }

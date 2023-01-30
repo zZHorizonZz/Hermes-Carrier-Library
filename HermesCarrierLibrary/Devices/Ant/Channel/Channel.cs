@@ -7,7 +7,15 @@ namespace HermesCarrierLibrary.Devices.Ant.Channel;
 
 public class Channel : IAntChannel
 {
+    private readonly WeakEventManager mMessageReceivedEventManager = new();
+
     private IAntTransmitter? mTransmitter;
+
+    public event EventHandler<AntMessageReceivedEventArgs> MessageReceived
+    {
+        add => mMessageReceivedEventManager.AddEventHandler(value);
+        remove => mMessageReceivedEventManager.RemoveEventHandler(value);
+    }
 
     public Channel()
     {
@@ -110,7 +118,7 @@ public class Channel : IAntChannel
     {
         if (mTransmitter == null)
             throw new InvalidOperationException("Channel is not open");
-        
+
         message.ChannelNumber = Number;
         return await mTransmitter.AwaitMessageOfTypeAsync<T>(message);
     }
@@ -122,5 +130,11 @@ public class Channel : IAntChannel
             throw new InvalidOperationException("Channel is not open");
 
         return await mTransmitter.ReceiveMessageAsync(data);
+    }
+
+    /// <inheritdoc />
+    public void OnMessageReceived(object sender, AntMessageReceivedEventArgs e)
+    {
+        mMessageReceivedEventManager.HandleEvent(this, e, nameof(MessageReceived));
     }
 }

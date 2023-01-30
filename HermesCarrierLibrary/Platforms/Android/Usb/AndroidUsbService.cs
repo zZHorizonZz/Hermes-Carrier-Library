@@ -103,6 +103,7 @@ public class AndroidUsbService : IUsbService
 
     public void OnDeviceAttached(UsbDevice device)
     {
+        Console.WriteLine($"Device attached: {device.DeviceName} {device.DeviceId}");
         var serial = new UsbSerial(device);
         mDevices.Add(device.DeviceId, serial);
 
@@ -118,6 +119,7 @@ public class AndroidUsbService : IUsbService
 
     public void OnDeviceDetached(UsbDevice device)
     {
+        Console.WriteLine($"Device detached: {device.DeviceName} {device.DeviceId}");
         var serial = mDevices[device.DeviceId];
         mDevices.Remove(device.DeviceId);
 

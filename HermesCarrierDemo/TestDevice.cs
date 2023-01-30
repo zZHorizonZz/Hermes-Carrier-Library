@@ -1,4 +1,5 @@
-﻿using HermesCarrierLibrary.Devices.Ant.Channel;
+﻿using HermesCarrierLibrary.Devices.Ant;
+using HermesCarrierLibrary.Devices.Ant.Channel;
 using HermesCarrierLibrary.Devices.Ant.Enum;
 using HermesCarrierLibrary.Devices.Ant.Interfaces;
 using HermesCarrierLibrary.Devices.Ant.Messages.Client;
@@ -27,6 +28,8 @@ public class TestDevice
     ///     Gets the type of transmission being used by the ANT transmitter, such as asynchronous or synchronous.
     /// </summary>
     public byte TransmissionType { get; init; } = 0x01;
+
+    public event EventHandler<ValueReceivedEventArgs> ValueReceived;
 
     public TestDevice()
     {
@@ -78,6 +81,56 @@ public class TestDevice
             return;
         }
 
+        channel.MessageReceived += OnMessageReceived;
         await transmitter.OpenChannelAsync(channel);
+    }
+
+    private void OnMessageReceived(object sender, AntMessageReceivedEventArgs e)
+    {
+        Console.WriteLine($"Received message: {e.Message}");
+        if (e.Message is AcknowledgedDataMessage message)
+            DecodeAndPrintData(message.Data);
+    }
+
+    private void DecodeAndPrintData(byte[] data)
+    {
+        Console.WriteLine($"Data: {BitConverter.ToString(data)}");
+        if (data.Length < 8)
+            return;
+
+        if (data[2] != 0xdb)
+            return;
+
+        var dataByte = data[3];
+        var sign = dataByte & 0x80;
+        var decimalPoint = (dataByte & 0x70) >> 4;
+        var unit = (dataByte & 0x0c) >> 2;
+
+        var valueBytes = new byte[4];
+
+        Array.Copy(data, 4, valueBytes, 0, 3);
+        Array.Reverse(valueBytes);
+
+        var valueString = string.Join(string.Empty, valueBytes.Select(x => x.ToString("X2")));
+        if (decimalPoint > 0)
+            valueString = valueString.Insert(valueString.Length - decimalPoint, ".");
+
+        var value = float.Parse(valueString);
+        if (sign == 0x80)
+            value *= -1;
+
+        ValueReceived?.Invoke(this, new ValueReceivedEventArgs(value, (byte)unit));
+    }
+
+    public class ValueReceivedEventArgs : EventArgs
+    {
+        public float Value { get; init; }
+        public byte Unit { get; init; }
+
+        public ValueReceivedEventArgs(float value, byte unit)
+        {
+            Value = value;
+            Unit = unit;
+        }
     }
 }

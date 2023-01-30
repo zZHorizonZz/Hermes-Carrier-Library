@@ -39,6 +39,8 @@ public interface IAntChannel : IAntMessenger
     /// </summary>
     byte Frequency { get; }
 
+    event EventHandler<AntMessageReceivedEventArgs> MessageReceived;
+
     Task AssignChannel(IAntTransmitter transmitter);
 
     Task Open();
@@ -48,4 +50,6 @@ public interface IAntChannel : IAntMessenger
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
     Task Close();
+
+    void OnMessageReceived(object? sender, AntMessageReceivedEventArgs e);
 }

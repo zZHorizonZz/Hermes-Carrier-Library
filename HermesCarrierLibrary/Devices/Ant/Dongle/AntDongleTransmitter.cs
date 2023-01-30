@@ -1,4 +1,5 @@
-﻿using HermesCarrierLibrary.Devices.Ant.Channel;
+﻿using System.Diagnostics;
+using HermesCarrierLibrary.Devices.Ant.Channel;
 using HermesCarrierLibrary.Devices.Ant.Interfaces;
 using HermesCarrierLibrary.Devices.Ant.Messages.Client;
 using HermesCarrierLibrary.Devices.Ant.Messages.Device;
@@ -12,6 +13,15 @@ public class AntDongleTransmitter : IAntTransmitter
         mAwaitingMessages = new Dictionary<IAntMessage, TaskCompletionSource<IAntMessage>>();
 
     private readonly ISerial mDevice;
+    private readonly WeakEventManager mMessageReceivedEventManager = new();
+
+    private Thread mReadThread;
+
+    public event EventHandler<AntMessageReceivedEventArgs> MessageReceived
+    {
+        add => mMessageReceivedEventManager.AddEventHandler(value);
+        remove => mMessageReceivedEventManager.RemoveEventHandler(value);
+    }
 
     public AntDongleTransmitter(ISerial device)
     {
@@ -35,6 +45,7 @@ public class AntDongleTransmitter : IAntTransmitter
     /// <inheritdoc />
     public IDictionary<byte, IAntChannel> ActiveChannels { get; } = new Dictionary<byte, IAntChannel>();
 
+
     /// <inheritdoc />
     public async Task SetNetworkKeyAsync(byte networkNumber, byte[] key)
     {
@@ -48,6 +59,8 @@ public class AntDongleTransmitter : IAntTransmitter
             throw new Exception("Channel already open");
 
         await channel.Open();
+
+        MessageReceived += channel.OnMessageReceived;
         ActiveChannels.Add(channel.Number, channel);
     }
 
@@ -57,6 +70,7 @@ public class AntDongleTransmitter : IAntTransmitter
         if (!ActiveChannels.ContainsKey(channel.Number))
             throw new Exception("Channel not open");
 
+        MessageReceived -= channel.OnMessageReceived;
         await channel.Close();
         ActiveChannels.Remove(channel.Number);
     }
@@ -107,7 +121,6 @@ public class AntDongleTransmitter : IAntTransmitter
 
     public void OnClose(object? sender, System.EventArgs e)
     {
-        // TODO: Implement
     }
 
     private IAntMessage DecodeMessage(byte[] data)
@@ -119,8 +132,8 @@ public class AntDongleTransmitter : IAntTransmitter
 
     private void StartReadThread()
     {
-        var readThread = new Thread(async () => { await Start(); });
-        readThread.Start();
+        mReadThread = new Thread(async () => { await Start(); });
+        mReadThread.Start();
     }
 
     private async Task Start()
@@ -139,11 +152,8 @@ public class AntDongleTransmitter : IAntTransmitter
                 source.SetResult(message);
             }
 
-            if (message is UnknownMessage)
-                Console.WriteLine(message);
-
-            if (message is AcknowledgedDataMessage acknowledgedDataMessage)
-                Console.WriteLine(acknowledgedDataMessage);
+            mMessageReceivedEventManager.HandleEvent(this, new AntMessageReceivedEventArgs(message),
+                nameof(MessageReceived));
         }
     }
 }
