@@ -2,9 +2,6 @@
 
 public class AddEncryptionIdToListMessage : AntMessage
 {
-    public byte[] EncryptionId { get; set; }
-    public byte ListIndex { get; set; }
-
     /// <inheritdoc />
     public AddEncryptionIdToListMessage() : base(0x59, 6)
     {
@@ -19,6 +16,9 @@ public class AddEncryptionIdToListMessage : AntMessage
         EncryptionId = encryptionId;
         ListIndex = listIndex;
     }
+
+    public byte[] EncryptionId { get; set; }
+    public byte ListIndex { get; set; }
 
     /// <inheritdoc />
     public override void DecodePayload(BinaryReader payload)

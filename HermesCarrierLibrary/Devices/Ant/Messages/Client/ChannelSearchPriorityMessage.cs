@@ -2,8 +2,6 @@
 
 public class ChannelSearchPriorityMessage : AntMessage
 {
-    public byte SearchPriority { get; set; }
-
     /// <inheritdoc />
     public ChannelSearchPriorityMessage() : base(0x75, 2)
     {
@@ -14,6 +12,8 @@ public class ChannelSearchPriorityMessage : AntMessage
     {
         SearchPriority = searchPriority;
     }
+
+    public byte SearchPriority { get; set; }
 
     /// <inheritdoc />
     public override void DecodePayload(BinaryReader payload)

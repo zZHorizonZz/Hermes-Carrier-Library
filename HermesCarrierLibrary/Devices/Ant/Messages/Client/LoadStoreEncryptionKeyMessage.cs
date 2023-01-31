@@ -4,10 +4,6 @@ namespace HermesCarrierLibrary.Devices.Ant.Messages.Client;
 
 public class LoadStoreEncryptionKeyMessage : AntMessage
 {
-    public EncryptionOperation Operation { get; set; } = EncryptionOperation.Load;
-    public byte KeyIndex { get; set; }
-    public byte[] Key { get; set; }
-
     /// <inheritdoc />
     public LoadStoreEncryptionKeyMessage() : base(0x83, 18)
     {
@@ -20,6 +16,10 @@ public class LoadStoreEncryptionKeyMessage : AntMessage
         KeyIndex = keyIndex;
         Key = key;
     }
+
+    public EncryptionOperation Operation { get; set; } = EncryptionOperation.Load;
+    public byte KeyIndex { get; set; }
+    public byte[] Key { get; set; }
 
     /// <inheritdoc />
     public override void DecodePayload(BinaryReader payload)

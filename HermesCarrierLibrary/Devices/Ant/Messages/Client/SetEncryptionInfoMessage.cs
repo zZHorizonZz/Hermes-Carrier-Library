@@ -2,9 +2,6 @@
 
 public class SetEncryptionInfoMessage : AntMessage
 {
-    public byte Parameters { get; set; }
-    public byte[] DataString { get; set; }
-
     /// <inheritdoc />
     public SetEncryptionInfoMessage() : base(0x7F, 20)
     {
@@ -16,6 +13,9 @@ public class SetEncryptionInfoMessage : AntMessage
         Parameters = parameters;
         DataString = dataString;
     }
+
+    public byte Parameters { get; set; }
+    public byte[] DataString { get; set; }
 
     /// <inheritdoc />
     public override void DecodePayload(BinaryReader payload)

@@ -2,8 +2,6 @@
 
 public class ProximitySearchMessage : AntMessage
 {
-    public byte UcSearchThreshold { get; set; }
-
     /// <inheritdoc />
     public ProximitySearchMessage() : base(0x71, 2)
     {
@@ -14,6 +12,8 @@ public class ProximitySearchMessage : AntMessage
     {
         UcSearchThreshold = ucSearchThreshold;
     }
+
+    public byte UcSearchThreshold { get; set; }
 
     /// <inheritdoc />
     public override void DecodePayload(BinaryReader payload)

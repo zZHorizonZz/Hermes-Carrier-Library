@@ -2,8 +2,6 @@
 
 public class Set128BitNetworkKeyMessage : AntMessage
 {
-    public byte[] NetworkKey { get; set; }
-
     /// <inheritdoc />
     public Set128BitNetworkKeyMessage() : base(0x76, 17)
     {
@@ -15,6 +13,8 @@ public class Set128BitNetworkKeyMessage : AntMessage
         NetworkKey = networkKey;
     }
 
+    public byte[] NetworkKey { get; set; }
+
     /// <inheritdoc />
     public override void DecodePayload(BinaryReader payload)
     {
@@ -24,10 +24,7 @@ public class Set128BitNetworkKeyMessage : AntMessage
     /// <inheritdoc />
     public override BinaryWriter EncodePayload()
     {
-        if (NetworkKey is not { Length: 16 })
-        {
-            throw new ArgumentException("NetworkKey must be 16 bytes long");
-        }
+        if (NetworkKey is not { Length: 16 }) throw new ArgumentException("NetworkKey must be 16 bytes long");
 
         var payload = new BinaryWriter(new MemoryStream());
         payload.Write(ChannelNumber);

@@ -2,8 +2,6 @@
 
 public class LowPrioritySearchTimeoutMessage : AntMessage
 {
-    public byte SearchTimeout { get; set; }
-
     /// <inheritdoc />
     public LowPrioritySearchTimeoutMessage() : base(0x63, 2)
     {
@@ -14,6 +12,8 @@ public class LowPrioritySearchTimeoutMessage : AntMessage
     {
         SearchTimeout = searchTimeout;
     }
+
+    public byte SearchTimeout { get; set; }
 
     /// <inheritdoc />
     public override void DecodePayload(BinaryReader payload)

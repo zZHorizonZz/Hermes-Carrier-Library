@@ -11,26 +11,26 @@ namespace HermesCarrierDemo;
 public partial class AntDongleViewModel : ObservableObject
 {
     private readonly DeviceService mDeviceService = new();
-    private IAntTransmitter mTransmitter;
-
-    [ObservableProperty] private string _status = "Disconnected";
-
-    [ObservableProperty] private Color _statusColor = Color.FromArgb("#FF0000");
 
     [ObservableProperty] private string _deviceNumber = "2000";
 
     [ObservableProperty] private string _deviceType = "5";
 
+    [ObservableProperty] private string _status = "Disconnected";
+
+    [ObservableProperty] private Color _statusColor = Color.FromArgb("#FF0000");
+
     [ObservableProperty] private string _transmissionType = "1";
 
     private IAntChannel mChannel;
-
-    public event EventHandler<TestDevice.ValueReceivedEventArgs> ValueReceived;
+    private IAntTransmitter mTransmitter;
 
     public AntDongleViewModel()
     {
         mDeviceService.AntService.TransmitterStatusChanged += OnTransmitterStatusChanged;
     }
+
+    public event EventHandler<TestDevice.ValueReceivedEventArgs> ValueReceived;
 
     [RelayCommand]
     public async Task Connect()
@@ -41,7 +41,7 @@ public partial class AntDongleViewModel : ObservableObject
         mChannel = new Channel(0, 1, ChannelType.TransmitChannel, ExtendedAssignmentType.UNKNOWN, 0x2000,
             0x03);
 
-        var testDevice = new TestDevice()
+        var testDevice = new TestDevice
         {
             DeviceNumber = ushort.Parse(DeviceNumber),
             DeviceType = byte.Parse(DeviceType),
@@ -63,9 +63,6 @@ public partial class AntDongleViewModel : ObservableObject
         Status = e.Transmitter.IsConnected ? "Connected" : "Disconnected";
         StatusColor = e.Transmitter.IsConnected ? Color.FromArgb("#00FF00") : Color.FromArgb("#FF0000");
 
-        if (e.Transmitter.IsConnected)
-        {
-            mTransmitter = e.Transmitter;
-        }
+        if (e.Transmitter.IsConnected) mTransmitter = e.Transmitter;
     }
 }

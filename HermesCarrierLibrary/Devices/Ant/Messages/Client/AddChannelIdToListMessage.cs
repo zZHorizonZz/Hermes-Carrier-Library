@@ -2,11 +2,6 @@
 
 public class AddChannelIdToListMessage : AntMessage
 {
-    public ushort DeviceNumber { get; set; }
-    public byte DeviceType { get; set; }
-    public byte TransmissionType { get; set; }
-    public byte ListIndex { get; set; }
-
     /// <inheritdoc />
     public AddChannelIdToListMessage() : base(0x59, 6)
     {
@@ -25,6 +20,11 @@ public class AddChannelIdToListMessage : AntMessage
         TransmissionType = transmissionType;
         ListIndex = listIndex;
     }
+
+    public ushort DeviceNumber { get; set; }
+    public byte DeviceType { get; set; }
+    public byte TransmissionType { get; set; }
+    public byte ListIndex { get; set; }
 
     /// <inheritdoc />
     public override void DecodePayload(BinaryReader payload)

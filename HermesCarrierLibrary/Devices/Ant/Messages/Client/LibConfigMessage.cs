@@ -4,8 +4,6 @@ namespace HermesCarrierLibrary.Devices.Ant.Messages.Client;
 
 public class LibConfigMessage : AntMessage
 {
-    public LibConfig LibConfig { get; set; } = LibConfig.Disabled;
-
     /// <inheritdoc />
     public LibConfigMessage() : base(0x6E, 2)
     {
@@ -16,6 +14,8 @@ public class LibConfigMessage : AntMessage
     {
         LibConfig = libConfig;
     }
+
+    public LibConfig LibConfig { get; set; } = LibConfig.Disabled;
 
     /// <inheritdoc />
     public override void DecodePayload(BinaryReader payload)

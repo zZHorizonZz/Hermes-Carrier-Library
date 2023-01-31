@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using HermesCarrierLibrary.Devices.Ant.Channel;
+﻿using HermesCarrierLibrary.Devices.Ant.Channel;
 using HermesCarrierLibrary.Devices.Ant.Interfaces;
 using HermesCarrierLibrary.Devices.Ant.Messages.Client;
 using HermesCarrierLibrary.Devices.Ant.Messages.Device;
@@ -17,24 +16,14 @@ public class AntDongleTransmitter : IAntTransmitter
 
     private Thread mReadThread;
 
-    public event EventHandler<AntMessageReceivedEventArgs> MessageReceived
-    {
-        add => mMessageReceivedEventManager.AddEventHandler(value);
-        remove => mMessageReceivedEventManager.RemoveEventHandler(value);
-    }
-
     public AntDongleTransmitter(ISerial device)
     {
         mDevice = device;
 
         if (device.IsConnected)
-        {
             StartReadThread();
-        }
         else
-        {
             device.Opened += OnOpen;
-        }
 
         device.Closed += OnClose;
     }
@@ -112,6 +101,12 @@ public class AntDongleTransmitter : IAntTransmitter
         if (message is not UnknownMessage) message.Decode(data);
 
         return Task.FromResult(message);
+    }
+
+    public event EventHandler<AntMessageReceivedEventArgs> MessageReceived
+    {
+        add => mMessageReceivedEventManager.AddEventHandler(value);
+        remove => mMessageReceivedEventManager.RemoveEventHandler(value);
     }
 
     public void OnOpen(object? sender, System.EventArgs e)

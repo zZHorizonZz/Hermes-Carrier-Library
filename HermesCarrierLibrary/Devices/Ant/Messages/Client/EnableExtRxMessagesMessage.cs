@@ -2,8 +2,6 @@
 
 public class EnableExtRxMessagesMessage : AntMessage
 {
-    public bool Enable { get; set; }
-
     /// <inheritdoc />
     public EnableExtRxMessagesMessage() : base(0x66, 2)
     {
@@ -14,6 +12,8 @@ public class EnableExtRxMessagesMessage : AntMessage
     {
         Enable = enable;
     }
+
+    public bool Enable { get; set; }
 
     /// <inheritdoc />
     public override void DecodePayload(BinaryReader payload)

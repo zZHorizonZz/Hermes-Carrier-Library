@@ -11,12 +11,6 @@ public class Channel : IAntChannel
 
     private IAntTransmitter? mTransmitter;
 
-    public event EventHandler<AntMessageReceivedEventArgs> MessageReceived
-    {
-        add => mMessageReceivedEventManager.AddEventHandler(value);
-        remove => mMessageReceivedEventManager.RemoveEventHandler(value);
-    }
-
     public Channel()
     {
     }
@@ -30,6 +24,12 @@ public class Channel : IAntChannel
         ExtendedAssignment = extendedAssignment;
         Period = period;
         Frequency = frequency;
+    }
+
+    public event EventHandler<AntMessageReceivedEventArgs> MessageReceived
+    {
+        add => mMessageReceivedEventManager.AddEventHandler(value);
+        remove => mMessageReceivedEventManager.RemoveEventHandler(value);
     }
 
     /// <inheritdoc />

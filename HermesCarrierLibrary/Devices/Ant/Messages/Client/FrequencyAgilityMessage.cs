@@ -2,10 +2,6 @@
 
 public class FrequencyAgilityMessage : AntMessage
 {
-    public byte UcFrequency1 { get; set; }
-    public byte UcFrequency2 { get; set; }
-    public byte UcFrequency3 { get; set; }
-
     /// <inheritdoc />
     public FrequencyAgilityMessage() : base(0x70, 4)
     {
@@ -18,6 +14,10 @@ public class FrequencyAgilityMessage : AntMessage
         UcFrequency2 = ucFrequency2;
         UcFrequency3 = ucFrequency3;
     }
+
+    public byte UcFrequency1 { get; set; }
+    public byte UcFrequency2 { get; set; }
+    public byte UcFrequency3 { get; set; }
 
     /// <inheritdoc />
     public override void DecodePayload(BinaryReader payload)

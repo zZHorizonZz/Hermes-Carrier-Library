@@ -2,9 +2,6 @@
 
 public class CwTestMessage : AntMessage
 {
-    public byte TransmitPower { get; set; }
-    public byte ChannelRfFrequency { get; set; }
-
     /// <inheritdoc />
     public CwTestMessage() : base(0x48, 3)
     {
@@ -16,6 +13,9 @@ public class CwTestMessage : AntMessage
         TransmitPower = transmitPower;
         ChannelRfFrequency = channelRfFrequency;
     }
+
+    public byte TransmitPower { get; set; }
+    public byte ChannelRfFrequency { get; set; }
 
     /// <inheritdoc />
     public override void DecodePayload(BinaryReader payload)

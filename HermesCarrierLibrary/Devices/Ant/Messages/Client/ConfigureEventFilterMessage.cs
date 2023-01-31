@@ -2,8 +2,6 @@
 
 public class ConfigureEventFilterMessage : AntMessage
 {
-    public ushort EventFilter { get; set; }
-
     /// <inheritdoc />
     public ConfigureEventFilterMessage() : base(0x79, 3)
     {
@@ -14,6 +12,8 @@ public class ConfigureEventFilterMessage : AntMessage
     {
         EventFilter = eventFilter;
     }
+
+    public ushort EventFilter { get; set; }
 
     /// <inheritdoc />
     public override void DecodePayload(BinaryReader payload)

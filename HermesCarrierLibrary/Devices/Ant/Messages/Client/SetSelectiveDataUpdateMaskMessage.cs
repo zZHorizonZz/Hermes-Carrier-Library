@@ -2,9 +2,6 @@
 
 public class SetSelectiveDataUpdateMaskMessage : AntMessage
 {
-    public byte SduMaskNumber { get; set; }
-    public byte[] SduMask { get; set; }
-
     /// <inheritdoc />
     public SetSelectiveDataUpdateMaskMessage() : base(0x7B, 9)
     {
@@ -16,6 +13,9 @@ public class SetSelectiveDataUpdateMaskMessage : AntMessage
         SduMaskNumber = sduMaskNumber;
         SduMask = sduMask;
     }
+
+    public byte SduMaskNumber { get; set; }
+    public byte[] SduMask { get; set; }
 
     /// <inheritdoc />
     public override void DecodePayload(BinaryReader payload)

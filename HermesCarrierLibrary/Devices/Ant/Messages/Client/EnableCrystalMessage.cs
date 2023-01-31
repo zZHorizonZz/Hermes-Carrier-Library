@@ -2,8 +2,6 @@
 
 public class EnableCrystalMessage : AntMessage
 {
-    public bool Enable { get; set; }
-
     /// <inheritdoc />
     public EnableCrystalMessage() : base(0x6D, 1)
     {
@@ -14,6 +12,8 @@ public class EnableCrystalMessage : AntMessage
     {
         Enable = enable;
     }
+
+    public bool Enable { get; set; }
 
     /// <inheritdoc />
     public override void DecodePayload(BinaryReader payload)

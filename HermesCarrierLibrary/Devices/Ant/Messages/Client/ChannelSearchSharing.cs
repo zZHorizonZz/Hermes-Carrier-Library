@@ -2,8 +2,6 @@
 
 public class ChannelSearchSharingMessage : AntMessage
 {
-    public byte SearchSharingCycles { get; set; }
-
     /// <inheritdoc />
     public ChannelSearchSharingMessage() : base(0x81, 2)
     {
@@ -14,6 +12,8 @@ public class ChannelSearchSharingMessage : AntMessage
     {
         SearchSharingCycles = searchSharingCycles;
     }
+
+    public byte SearchSharingCycles { get; set; }
 
     /// <inheritdoc />
     public override void DecodePayload(BinaryReader payload)

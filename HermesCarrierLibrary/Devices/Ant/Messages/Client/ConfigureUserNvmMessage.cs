@@ -2,9 +2,6 @@
 
 public class ConfigureUserNvmMessage : AntMessage
 {
-    public ushort Address { get; set; }
-    public byte[] Data { get; set; }
-
     /// <inheritdoc />
     public ConfigureUserNvmMessage() : base(0x7C, 2)
     {
@@ -16,6 +13,9 @@ public class ConfigureUserNvmMessage : AntMessage
         Address = address;
         Data = data;
     }
+
+    public ushort Address { get; set; }
+    public byte[] Data { get; set; }
 
     /// <inheritdoc />
     public override void DecodePayload(BinaryReader payload)

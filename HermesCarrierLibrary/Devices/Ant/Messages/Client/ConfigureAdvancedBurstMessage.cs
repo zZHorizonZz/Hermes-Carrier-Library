@@ -2,13 +2,6 @@
 
 public class ConfigureAdvancedBurstMessage : AntMessage
 {
-    public bool Enable { get; set; }
-    public byte MaxPacketLength { get; set; }
-    public ulong RequiredFeatures { get; set; }
-    public ulong OptionalFeatures { get; set; }
-    public byte StallCount { get; set; }
-    public byte RetryCountExtension { get; set; }
-
     /// <inheritdoc />
     public ConfigureAdvancedBurstMessage() : base(0x78, 12)
     {
@@ -29,6 +22,13 @@ public class ConfigureAdvancedBurstMessage : AntMessage
         StallCount = stallCount;
         RetryCountExtension = retryCountExtension;
     }
+
+    public bool Enable { get; set; }
+    public byte MaxPacketLength { get; set; }
+    public ulong RequiredFeatures { get; set; }
+    public ulong OptionalFeatures { get; set; }
+    public byte StallCount { get; set; }
+    public byte RetryCountExtension { get; set; }
 
     /// <inheritdoc />
     public override void DecodePayload(BinaryReader payload)

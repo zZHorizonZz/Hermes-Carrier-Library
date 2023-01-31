@@ -2,10 +2,6 @@
 
 public class SerialNumberSetChannelIdMessage : AntMessage
 {
-    public bool PairingRequest { get; set; }
-    public byte DeviceTypeId { get; set; }
-    public byte TransmissionType { get; set; }
-
     /// <inheritdoc />
     public SerialNumberSetChannelIdMessage() : base(0x65, 3)
     {
@@ -18,6 +14,10 @@ public class SerialNumberSetChannelIdMessage : AntMessage
         DeviceTypeId = deviceTypeId;
         TransmissionType = transmissionType;
     }
+
+    public bool PairingRequest { get; set; }
+    public byte DeviceTypeId { get; set; }
+    public byte TransmissionType { get; set; }
 
     /// <inheritdoc />
     public override void DecodePayload(BinaryReader payload)

@@ -2,9 +2,6 @@
 
 public class ConfigIdListMessage : AntMessage
 {
-    public byte ListSize { get; set; }
-    public byte Exclude { get; set; }
-
     /// <inheritdoc />
     public ConfigIdListMessage() : base(0x5A, 3)
     {
@@ -16,6 +13,9 @@ public class ConfigIdListMessage : AntMessage
         ListSize = listSize;
         Exclude = exclude;
     }
+
+    public byte ListSize { get; set; }
+    public byte Exclude { get; set; }
 
     /// <inheritdoc />
     public override void DecodePayload(BinaryReader payload)

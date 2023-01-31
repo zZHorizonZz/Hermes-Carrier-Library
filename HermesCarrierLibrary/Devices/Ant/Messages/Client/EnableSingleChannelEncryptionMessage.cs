@@ -2,10 +2,6 @@
 
 public class EnableSingleChannelEncryptionMessage : AntMessage
 {
-    public byte EncryptionMode { get; set; }
-    public byte VolatileKeyIndex { get; set; }
-    public byte DecimationRate { get; set; }
-
     /// <inheritdoc />
     public EnableSingleChannelEncryptionMessage() : base(0x7D, 4)
     {
@@ -19,6 +15,10 @@ public class EnableSingleChannelEncryptionMessage : AntMessage
         VolatileKeyIndex = volatileKeyIndex;
         DecimationRate = decimationRate;
     }
+
+    public byte EncryptionMode { get; set; }
+    public byte VolatileKeyIndex { get; set; }
+    public byte DecimationRate { get; set; }
 
     /// <inheritdoc />
     public override void DecodePayload(BinaryReader payload)

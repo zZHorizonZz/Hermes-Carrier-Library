@@ -5,5 +5,5 @@ public enum StringNumber
     PIDVID = 0,
     ManufacturerString = 1,
     DeviceString = 2,
-    SerialNumberString = 3,
+    SerialNumberString = 3
 }

@@ -25,7 +25,7 @@ public class AntService : IAntService
         new ResetSystemMessage(),
         new ChannelIdMessage(),
         new SetNetworkKeyMessage(),
-        new UnAssignChannelMessage(),
+        new UnAssignChannelMessage()
     };
 
     public static readonly IAntMessage[] DeviceBoundMessages =
@@ -33,7 +33,7 @@ public class AntService : IAntService
         new AcknowledgedDataMessage(),
         new AntVersionMessage(),
         new EventResponseMessage(),
-        new StartUpMessage(),
+        new StartUpMessage()
     };
 
     private readonly WeakEventManager mTransmitterStatusChangedEventManager = new();

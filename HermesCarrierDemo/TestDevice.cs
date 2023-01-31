@@ -10,6 +10,18 @@ namespace HermesCarrierDemo;
 
 public class TestDevice
 {
+    public TestDevice()
+    {
+    }
+
+    public TestDevice(ushort deviceNumber, bool isSlave, byte deviceType, byte transmissionType)
+    {
+        DeviceNumber = deviceNumber;
+        IsSlave = isSlave;
+        DeviceType = deviceType;
+        TransmissionType = transmissionType;
+    }
+
     /// <summary>
     ///     Gets the unique device number assigned to the ANT transmitter.
     /// </summary>
@@ -31,18 +43,6 @@ public class TestDevice
     public byte TransmissionType { get; init; } = 0x01;
 
     public event EventHandler<ValueReceivedEventArgs> ValueReceived;
-
-    public TestDevice()
-    {
-    }
-
-    public TestDevice(ushort deviceNumber, bool isSlave, byte deviceType, byte transmissionType)
-    {
-        DeviceNumber = deviceNumber;
-        IsSlave = isSlave;
-        DeviceType = deviceType;
-        TransmissionType = transmissionType;
-    }
 
     public async Task Open(IAntTransmitter transmitter, IAntChannel channel)
     {
@@ -125,13 +125,13 @@ public class TestDevice
 
     public class ValueReceivedEventArgs : EventArgs
     {
-        public float Value { get; init; }
-        public byte Unit { get; init; }
-
         public ValueReceivedEventArgs(float value, byte unit)
         {
             Value = value;
             Unit = unit;
         }
+
+        public float Value { get; init; }
+        public byte Unit { get; init; }
     }
 }

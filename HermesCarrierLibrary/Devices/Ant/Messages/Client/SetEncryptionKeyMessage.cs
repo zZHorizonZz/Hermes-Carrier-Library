@@ -2,9 +2,6 @@
 
 public class SetEncryptionKeyMessage : AntMessage
 {
-    public byte VolatileKeyIndex { get; set; }
-    public byte[] EncryptionKey { get; set; }
-
     /// <inheritdoc />
     public SetEncryptionKeyMessage() : base(0x7E, 17)
     {
@@ -16,6 +13,9 @@ public class SetEncryptionKeyMessage : AntMessage
         VolatileKeyIndex = volatileKeyIndex;
         EncryptionKey = encryptionKey;
     }
+
+    public byte VolatileKeyIndex { get; set; }
+    public byte[] EncryptionKey { get; set; }
 
     /// <inheritdoc />
     public override void DecodePayload(BinaryReader payload)

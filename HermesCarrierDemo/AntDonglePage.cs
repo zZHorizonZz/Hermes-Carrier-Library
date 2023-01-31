@@ -7,8 +7,8 @@ public class AntDonglePage : ContentPage
 {
     private readonly Label mDevicesCountLabel;
     private readonly Span mStatusSpan;
-    private readonly AntDongleViewModel mViewModel = new();
     private readonly VerticalStackLayout mValuesListView;
+    private readonly AntDongleViewModel mViewModel = new();
 
     public AntDonglePage()
     {
@@ -52,7 +52,7 @@ public class AntDonglePage : ContentPage
                     Text = "Connect", TextColor = Colors.White, BackgroundColor = Color.FromArgb("#FF0000"),
                     Command = mViewModel.ConnectCommand
                 },
-                new ScrollView()
+                new ScrollView
                 {
                     Content = new VerticalStackLayout().Assign(out mValuesListView)
                 }

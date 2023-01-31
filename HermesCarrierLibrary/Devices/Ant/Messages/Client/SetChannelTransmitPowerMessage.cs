@@ -2,8 +2,6 @@
 
 public class SetChannelTransmitPowerMessage : AntMessage
 {
-    public byte TransmitPower { get; set; }
-
     /// <inheritdoc />
     public SetChannelTransmitPowerMessage() : base(0x60, 2)
     {
@@ -14,6 +12,8 @@ public class SetChannelTransmitPowerMessage : AntMessage
     {
         TransmitPower = transmitPower;
     }
+
+    public byte TransmitPower { get; set; }
 
     /// <inheritdoc />
     public override void DecodePayload(BinaryReader payload)

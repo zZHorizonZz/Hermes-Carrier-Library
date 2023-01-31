@@ -4,9 +4,6 @@ namespace HermesCarrierLibrary.Devices.Ant.Messages.Client;
 
 public class SetUsbDescriptorStringMessage : AntMessage
 {
-    public StringNumber StringNumber { get; set; }
-    public string String { get; set; }
-
     /// <inheritdoc />
     public SetUsbDescriptorStringMessage() : base(0xC7, 64)
     {
@@ -19,6 +16,9 @@ public class SetUsbDescriptorStringMessage : AntMessage
         String = s;
     }
 
+    public StringNumber StringNumber { get; set; }
+    public string String { get; set; }
+
     /// <inheritdoc />
     public override void DecodePayload(BinaryReader payload)
     {
@@ -29,9 +29,7 @@ public class SetUsbDescriptorStringMessage : AntMessage
     public override BinaryWriter EncodePayload()
     {
         if (StringNumber == StringNumber.PIDVID && String.Length != 4)
-        {
             throw new OverflowException("StringNumber.PIDVID must be 4 characters long");
-        }
 
         var payload = new BinaryWriter(new MemoryStream());
         payload.Write((byte)StringNumber);

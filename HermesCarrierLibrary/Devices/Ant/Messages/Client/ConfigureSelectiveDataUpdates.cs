@@ -2,8 +2,6 @@
 
 public class ConfigureSelectiveDataUpdatesMessage : AntMessage
 {
-    public byte SelectedData { get; set; }
-
     /// <inheritdoc />
     public ConfigureSelectiveDataUpdatesMessage() : base(0x7A, 2)
     {
@@ -14,6 +12,8 @@ public class ConfigureSelectiveDataUpdatesMessage : AntMessage
     {
         SelectedData = selectedData;
     }
+
+    public byte SelectedData { get; set; }
 
     /// <inheritdoc />
     public override void DecodePayload(BinaryReader payload)

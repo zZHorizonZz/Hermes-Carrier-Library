@@ -2,9 +2,6 @@
 
 public class HighDutySearchMessage : AntMessage
 {
-    public bool Enable { get; set; }
-    public byte SuppressionCycle { get; set; } = 0x03;
-
     /// <inheritdoc />
     public HighDutySearchMessage() : base(0x77, 3)
     {
@@ -16,6 +13,9 @@ public class HighDutySearchMessage : AntMessage
         Enable = enable;
         SuppressionCycle = suppressionCycle;
     }
+
+    public bool Enable { get; set; }
+    public byte SuppressionCycle { get; set; } = 0x03;
 
     /// <inheritdoc />
     public override void DecodePayload(BinaryReader payload)

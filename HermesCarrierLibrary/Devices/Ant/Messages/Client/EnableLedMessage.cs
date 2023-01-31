@@ -2,8 +2,6 @@
 
 public class EnableLedMessage : AntMessage
 {
-    public bool Enable { get; set; }
-
     /// <inheritdoc />
     public EnableLedMessage() : base(0x68, 2)
     {
@@ -14,6 +12,8 @@ public class EnableLedMessage : AntMessage
     {
         Enable = enable;
     }
+
+    public bool Enable { get; set; }
 
     /// <inheritdoc />
     public override void DecodePayload(BinaryReader payload)

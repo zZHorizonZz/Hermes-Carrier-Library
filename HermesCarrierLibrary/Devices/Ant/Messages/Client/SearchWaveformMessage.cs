@@ -2,8 +2,6 @@
 
 public class SearchWaveformMessage : AntMessage
 {
-    public ushort SearchWaveform { get; set; }
-
     /// <inheritdoc />
     public SearchWaveformMessage() : base(0x49, 3)
     {
@@ -14,6 +12,8 @@ public class SearchWaveformMessage : AntMessage
     {
         SearchWaveform = searchWaveform;
     }
+
+    public ushort SearchWaveform { get; set; }
 
     /// <inheritdoc />
     public override void DecodePayload(BinaryReader payload)
