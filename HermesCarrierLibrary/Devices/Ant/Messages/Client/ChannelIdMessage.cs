@@ -1,14 +1,14 @@
 ﻿namespace HermesCarrierLibrary.Devices.Ant.Messages.Client;
 
-public class SetChannelIdMessage : AntMessage
+public class ChannelIdMessage : AntMessage
 {
     /// <inheritdoc />
-    public SetChannelIdMessage() : base(0x51, 5)
+    public ChannelIdMessage() : base(0x51, 5)
     {
     }
 
     /// <inheritdoc />
-    public SetChannelIdMessage(ushort device, bool pairing, byte deviceType, byte transmission) : this()
+    public ChannelIdMessage(ushort device, bool pairing, byte deviceType, byte transmission) : this()
     {
         DeviceNumber = device;
         Pairing = pairing;

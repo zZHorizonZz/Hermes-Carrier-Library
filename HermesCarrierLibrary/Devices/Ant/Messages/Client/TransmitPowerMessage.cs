@@ -1,18 +1,19 @@
 ﻿namespace HermesCarrierLibrary.Devices.Ant.Messages.Client;
 
-public class ChannelMessagingPeriodMessage : AntMessage
+public class TransmitPowerMessage : AntMessage
 {
+    public byte TransmitPower { get; set; }
+
     /// <inheritdoc />
-    public ChannelMessagingPeriodMessage() : base(0x43, 2)
+    public TransmitPowerMessage() : base(0x47, 2)
     {
     }
 
-    public ChannelMessagingPeriodMessage(ushort messagingPeriod) : this()
+    /// <inheritdoc />
+    public TransmitPowerMessage(byte transmitPower) : this()
     {
-        MessagingPeriod = messagingPeriod;
+        TransmitPower = transmitPower;
     }
-
-    public ushort MessagingPeriod { get; set; }
 
     /// <inheritdoc />
     public override void DecodePayload(BinaryReader payload)
@@ -24,8 +25,8 @@ public class ChannelMessagingPeriodMessage : AntMessage
     public override BinaryWriter EncodePayload()
     {
         var payload = new BinaryWriter(new MemoryStream());
-        payload.Write(ChannelNumber);
-        payload.Write(MessagingPeriod);
+        payload.Write(0x00); // Filler byte
+        payload.Write(TransmitPower);
         return payload;
     }
 }

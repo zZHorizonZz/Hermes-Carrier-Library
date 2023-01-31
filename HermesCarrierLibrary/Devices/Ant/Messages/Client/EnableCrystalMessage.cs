@@ -1,17 +1,19 @@
 ﻿namespace HermesCarrierLibrary.Devices.Ant.Messages.Client;
 
-public class ChannelRFFrequencyMessage : AntMessage
+public class EnableCrystalMessage : AntMessage
 {
-    public ChannelRFFrequencyMessage() : base(0x45, 2)
+    public bool Enable { get; set; }
+
+    /// <inheritdoc />
+    public EnableCrystalMessage() : base(0x6D, 1)
     {
     }
 
-    public ChannelRFFrequencyMessage(byte rfFrequency) : this()
+    /// <inheritdoc />
+    public EnableCrystalMessage(bool enable) : this()
     {
-        RFFrequency = rfFrequency;
+        Enable = enable;
     }
-
-    public byte RFFrequency { get; set; }
 
     /// <inheritdoc />
     public override void DecodePayload(BinaryReader payload)
@@ -23,8 +25,7 @@ public class ChannelRFFrequencyMessage : AntMessage
     public override BinaryWriter EncodePayload()
     {
         var payload = new BinaryWriter(new MemoryStream());
-        payload.Write(ChannelNumber);
-        payload.Write(RFFrequency);
+        payload.Write(Enable);
         return payload;
     }
 }

@@ -4,6 +4,7 @@ using HermesCarrierLibrary.Devices.Ant.Enum;
 using HermesCarrierLibrary.Devices.Ant.Interfaces;
 using HermesCarrierLibrary.Devices.Ant.Messages.Client;
 using HermesCarrierLibrary.Devices.Ant.Messages.Device;
+using ChannelIdMessage = HermesCarrierLibrary.Devices.Ant.Messages.Client.ChannelIdMessage;
 
 namespace HermesCarrierDemo;
 
@@ -52,7 +53,7 @@ public class TestDevice
 
         await channel.AssignChannel(transmitter);
 
-        var result = (await channel.AwaitMessageOfTypeAsync<EventResponseMessage>(new SetChannelIdMessage(DeviceNumber,
+        var result = (await channel.AwaitMessageOfTypeAsync<EventResponseMessage>(new ChannelIdMessage(DeviceNumber,
             !IsSlave,
             DeviceType,
             TransmissionType))).Type;
@@ -64,7 +65,7 @@ public class TestDevice
         }
 
         result = (await channel.AwaitMessageOfTypeAsync<EventResponseMessage>(
-            new ChannelMessagingPeriodMessage(channel.Period))).Type;
+            new ChannelPeriodMessage(channel.Period))).Type;
 
         if (result != EventResponseType.RESPONSE_NO_ERROR)
         {
@@ -73,7 +74,7 @@ public class TestDevice
         }
 
         result = (await channel.AwaitMessageOfTypeAsync<EventResponseMessage>(
-            new ChannelRFFrequencyMessage(channel.Frequency))).Type;
+            new ChannelRfFrequencyMessage(channel.Frequency))).Type;
 
         if (result != EventResponseType.RESPONSE_NO_ERROR)
         {

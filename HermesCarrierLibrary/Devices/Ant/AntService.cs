@@ -5,6 +5,7 @@ using HermesCarrierLibrary.Devices.Ant.Messages.Client;
 using HermesCarrierLibrary.Devices.Ant.Messages.Device;
 using HermesCarrierLibrary.Devices.Ant.Util;
 using HermesCarrierLibrary.Devices.Shared;
+using ChannelIdMessage = HermesCarrierLibrary.Devices.Ant.Messages.Client.ChannelIdMessage;
 
 namespace HermesCarrierLibrary.Devices.Ant;
 
@@ -15,14 +16,14 @@ public class AntService : IAntService
         new AcknowledgedDataMessage(),
         new AssignChannelMessage(),
         new BroadcastDataMessage(),
-        new ChannelMessagingPeriodMessage(),
-        new ChannelRFFrequencyMessage(),
+        new ChannelPeriodMessage(),
+        new ChannelRfFrequencyMessage(),
         new CloseChannelMessage(),
         new OpenChannelMessage(),
         new OpenRxScanMode(),
         new RequestMessage(),
         new ResetSystemMessage(),
-        new SetChannelIdMessage(),
+        new ChannelIdMessage(),
         new SetNetworkKeyMessage(),
         new UnAssignChannelMessage(),
     };
