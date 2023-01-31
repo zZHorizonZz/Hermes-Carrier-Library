@@ -13,27 +13,69 @@ public class AntService : IAntService
 {
     public static readonly IAntMessage[] ClientBoundMessages =
     {
-        new AcknowledgedDataMessage(),
+        new UnAssignChannelMessage(),
         new AssignChannelMessage(),
-        new BroadcastDataMessage(),
-        new ChannelPeriodMessage(),
-        new ChannelRfFrequencyMessage(),
-        new CloseChannelMessage(),
-        new OpenChannelMessage(),
-        new OpenRxScanMode(),
-        new RequestMessage(),
-        new ResetSystemMessage(),
         new ChannelIdMessage(),
+        new ChannelPeriodMessage(),
+        new SearchTimeoutMessage(),
+        new ChannelRfFrequencyMessage(),
         new SetNetworkKeyMessage(),
-        new UnAssignChannelMessage()
+        new TransmitPowerMessage(),
+        new SearchWaveformMessage(),
+        new AddChannelIdToListMessage(),
+        new AddEncryptionIdToListMessage(),
+        new ConfigIdListMessage(),
+        new ConfigEncryptionIdListMessage(),
+        new SetChannelTransmitPowerMessage(),
+        new LowPrioritySearchTimeoutMessage(),
+        new SerialNumberSetChannelIdMessage(),
+        new EnableExtRxMessagesMessage(),
+        new EnableLedMessage(),
+        new EnableCrystalMessage(),
+        new LibConfigMessage(),
+        new FrequencyAgilityMessage(),
+        new ProximitySearchMessage(),
+        new ConfigureEventBufferMessage(),
+        new ChannelSearchPriorityMessage(),
+        new Set128BitNetworkKeyMessage(),
+        new HighDutySearchMessage(),
+        new ConfigureAdvancedBurstMessage(),
+        new ConfigureEventFilterMessage(),
+        new ConfigureSelectiveDataUpdatesMessage(),
+        new SetSelectiveDataUpdateMaskMessage(),
+        new ConfigureUserNvmMessage(),
+        new EnableSingleChannelEncryptionMessage(),
+        new SetEncryptionKeyMessage(),
+        new SetEncryptionInfoMessage(),
+        new ChannelSearchSharingMessage(),
+        new LoadStoreEncryptionKeyMessage(),
+        new SetUsbDescriptorStringMessage(),
+        new ResetSystemMessage(),
+        new OpenChannelMessage(),
+        new CloseChannelMessage(),
+        new RequestMessage(),
+        new OpenRxScanMode(),
+        new SleepMessage(),
+        new CwInitMessage(),
+        new CwTestMessage()
     };
 
     public static readonly IAntMessage[] DeviceBoundMessages =
     {
-        new AcknowledgedDataMessage(),
-        new AntVersionMessage(),
+        new StartUpMessage(),
+        new SerialErrorMessage(),
         new EventResponseMessage(),
-        new StartUpMessage()
+        new ChannelStatusMessage(),
+        new ChannelIdMessage(),
+        new AntVersionMessage(),
+        new CapabilitiesMessage(),
+        new SerialNumberMessage(),
+        new EventBufferConfigurationMessage(),
+        //new AdvancedBurstCapabilitiesMessage(), TODO: Rework this message there are two states 0 and 1 where 0 is short and 1 is long
+        new EventFilterMessage(),
+        new SelectiveDataUpdateMaskSettingMessage(),
+        new UserNvmMessage(),
+        new EncryptionModeParametersMessage()
     };
 
     private readonly WeakEventManager mTransmitterStatusChangedEventManager = new();
