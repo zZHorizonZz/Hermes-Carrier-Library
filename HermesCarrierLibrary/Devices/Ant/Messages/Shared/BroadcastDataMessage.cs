@@ -16,7 +16,8 @@ public class BroadcastDataMessage : AntMessage
     /// <inheritdoc />
     public override void DecodePayload(BinaryReader payload)
     {
-        throw new NotImplementedException();
+        ChannelNumber = payload.ReadByte();
+        Data = payload.ReadBytes(8);
     }
 
     /// <inheritdoc />

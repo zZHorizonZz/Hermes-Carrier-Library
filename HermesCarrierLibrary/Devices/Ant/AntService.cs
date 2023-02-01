@@ -3,6 +3,7 @@ using HermesCarrierLibrary.Devices.Ant.EventArgs;
 using HermesCarrierLibrary.Devices.Ant.Interfaces;
 using HermesCarrierLibrary.Devices.Ant.Messages.Client;
 using HermesCarrierLibrary.Devices.Ant.Messages.Device;
+using HermesCarrierLibrary.Devices.Ant.Messages.Shared;
 using HermesCarrierLibrary.Devices.Ant.Util;
 using HermesCarrierLibrary.Devices.Shared;
 using ChannelIdMessage = HermesCarrierLibrary.Devices.Ant.Messages.Client.ChannelIdMessage;
@@ -57,7 +58,11 @@ public class AntService : IAntService
         new OpenRxScanMode(),
         new SleepMessage(),
         new CwInitMessage(),
-        new CwTestMessage()
+        new CwTestMessage(),
+        new AcknowledgedDataMessage(),
+        new AdvancedBurstDataMessage(),
+        new BroadcastDataMessage(),
+        new BurstTransferDataMessage()
     };
 
     public static readonly IAntMessage[] DeviceBoundMessages =
@@ -75,26 +80,21 @@ public class AntService : IAntService
         new EventFilterMessage(),
         new SelectiveDataUpdateMaskSettingMessage(),
         new UserNvmMessage(),
-        new EncryptionModeParametersMessage()
+        new EncryptionModeParametersMessage(),
+        new AcknowledgedDataMessage(),
+        new AdvancedBurstDataMessage(),
+        new BroadcastDataMessage(),
+        new BurstTransferDataMessage()
     };
 
-    private readonly WeakEventManager mTransmitterStatusChangedEventManager = new();
+    /// <inheritdoc />
+    public IDictionary<int, IAntTransmitter> Transmitters { get; } = new Dictionary<int, IAntTransmitter>();
 
     private readonly IUsbService mUsbService;
 
     public AntService(IUsbService usbService)
     {
         mUsbService = usbService;
-    }
-
-    /// <inheritdoc />
-    public IAntTransmitter CurrentTransmitter { get; set; }
-
-    /// <inheritdoc />
-    public event EventHandler<AntTransmitterStatusChangedEventArgs> TransmitterStatusChanged
-    {
-        add => mTransmitterStatusChangedEventManager.AddEventHandler(value);
-        remove => mTransmitterStatusChangedEventManager.RemoveEventHandler(value);
     }
 
     /// <inheritdoc />
@@ -108,26 +108,12 @@ public class AntService : IAntService
     /// <inheritdoc />
     public void ConnectTransmitter(IAntTransmitter transmitter)
     {
-        Console.WriteLine($"ConnectTransmitter: {transmitter}");
-        if (CurrentTransmitter != null)
-        {
-            //TODO Close current transmitter
-        }
-
-        if (!transmitter.IsConnected)
-            throw new Exception("Transmitter is not connected");
-
-        CurrentTransmitter = transmitter;
-        mTransmitterStatusChangedEventManager.HandleEvent(this, new AntTransmitterStatusChangedEventArgs(transmitter),
-            nameof(TransmitterStatusChanged));
+        Transmitters.Add(transmitter.GetHashCode(), transmitter);
     }
 
     /// <inheritdoc />
     public void DisconnectTransmitter(IAntTransmitter transmitter)
     {
-        Console.WriteLine($"DisconnectTransmitter: {transmitter}");
-        CurrentTransmitter = null;
-        mTransmitterStatusChangedEventManager.HandleEvent(this, new AntTransmitterStatusChangedEventArgs(transmitter),
-            nameof(TransmitterStatusChanged));
+        Transmitters.Remove(transmitter.GetHashCode());
     }
 }

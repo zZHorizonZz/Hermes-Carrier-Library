@@ -22,12 +22,19 @@ public partial class AntDongleViewModel : ObservableObject
 
     [ObservableProperty] private string _transmissionType = "1";
 
+    [ObservableProperty] private string _antVersion = "Unknown";
+
+    [ObservableProperty] private string _serialNumber = "Unknown";
+
+    [ObservableProperty] private string _capabilities = "Unknown";
+
     private IAntChannel mChannel;
     private IAntTransmitter mTransmitter;
 
     public AntDongleViewModel()
     {
-        mDeviceService.AntService.TransmitterStatusChanged += OnTransmitterStatusChanged;
+        mDeviceService.DeviceConnected += OnDeviceConnected;
+        mDeviceService.DeviceDisconnected += OnDeviceDisconnected;
     }
 
     public event EventHandler<TestDevice.ValueReceivedEventArgs> ValueReceived;
@@ -50,6 +57,12 @@ public partial class AntDongleViewModel : ObservableObject
 
         testDevice.ValueReceived += OnValueReceived;
         await testDevice.Open(mTransmitter, mChannel);
+
+        AntVersion = mTransmitter.AntVersion;
+        SerialNumber = mTransmitter.SerialNumber;
+        Capabilities = mTransmitter.Capabilities
+            .Select(capability => Enum.GetName(capability) ?? "Unknown" + $" ({(byte)capability:X2})")
+            .Aggregate((a, b) => $"{a}\n{b}");
     }
 
     public void OnValueReceived(object sender, TestDevice.ValueReceivedEventArgs e)
@@ -57,12 +70,26 @@ public partial class AntDongleViewModel : ObservableObject
         ValueReceived?.Invoke(sender, e);
     }
 
-    private void OnTransmitterStatusChanged(object sender, AntTransmitterStatusChangedEventArgs e)
+    private void OnDeviceConnected(object sender, DeviceEventArgs e)
     {
-        Console.WriteLine($"Transmitter status changed: {e.Transmitter.IsConnected}");
-        Status = e.Transmitter.IsConnected ? "Connected" : "Disconnected";
-        StatusColor = e.Transmitter.IsConnected ? Color.FromArgb("#00FF00") : Color.FromArgb("#FF0000");
+        var transmitter = mDeviceService.AntService.Transmitters[e.Serial.VendorId ^ e.Serial.ProductId];
+        Status = transmitter.IsConnected ? "Connected" : "Disconnected";
+        StatusColor = transmitter.IsConnected ? Color.FromArgb("#00FF00") : Color.FromArgb("#FF0000");
 
-        if (e.Transmitter.IsConnected) mTransmitter = e.Transmitter;
+        if (transmitter.IsConnected) mTransmitter = transmitter;
+    }
+
+    private void OnDeviceDisconnected(object sender, DeviceEventArgs e)
+    {
+        Reset();
+    }
+
+    private void Reset()
+    {
+        Status = "Disconnected";
+        StatusColor = Color.FromArgb("#FF0000");
+        AntVersion = "Unknown";
+        SerialNumber = "Unknown";
+        Capabilities = "Unknown";
     }
 }

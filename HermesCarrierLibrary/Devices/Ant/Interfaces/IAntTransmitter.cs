@@ -1,4 +1,5 @@
 ﻿using HermesCarrierLibrary.Devices.Ant.Channel;
+using HermesCarrierLibrary.Devices.Ant.Enum;
 using HermesCarrierLibrary.Devices.Ant.Messages;
 
 namespace HermesCarrierLibrary.Devices.Ant.Interfaces;
@@ -10,6 +11,12 @@ namespace HermesCarrierLibrary.Devices.Ant.Interfaces;
 /// </summary>
 public interface IAntTransmitter : IAntMessenger
 {
+    string AntVersion { get; }
+
+    string SerialNumber { get; }
+
+    IEnumerable<Capabilities> Capabilities { get; }
+
     /// <summary>
     ///     Gets a value indicating whether the serial connection is currently open.
     /// </summary>

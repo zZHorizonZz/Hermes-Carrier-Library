@@ -1,4 +1,5 @@
 ﻿using HermesCarrierLibrary.Devices.Ant.Channel;
+using HermesCarrierLibrary.Devices.Ant.Enum;
 using HermesCarrierLibrary.Devices.Ant.Interfaces;
 using HermesCarrierLibrary.Devices.Ant.Messages.Client;
 using HermesCarrierLibrary.Devices.Ant.Messages.Device;
@@ -21,7 +22,7 @@ public class AntDongleTransmitter : IAntTransmitter
         mDevice = device;
 
         if (device.IsConnected)
-            StartReadThread();
+            Start();
         else
             device.Opened += OnOpen;
 
@@ -30,6 +31,15 @@ public class AntDongleTransmitter : IAntTransmitter
 
     /// <inheritdoc />
     public bool IsConnected => mDevice.IsConnected;
+
+    /// <inheritdoc />
+    public string AntVersion { get; private set; }
+
+    /// <inheritdoc />
+    public string SerialNumber { get; private set; }
+
+    /// <inheritdoc />
+    public IEnumerable<Capabilities> Capabilities { get; private set; }
 
     /// <inheritdoc />
     public IDictionary<byte, IAntChannel> ActiveChannels { get; } = new Dictionary<byte, IAntChannel>();
@@ -111,7 +121,7 @@ public class AntDongleTransmitter : IAntTransmitter
 
     public void OnOpen(object? sender, System.EventArgs e)
     {
-        StartReadThread();
+        Start();
     }
 
     public void OnClose(object? sender, System.EventArgs e)
@@ -120,35 +130,70 @@ public class AntDongleTransmitter : IAntTransmitter
 
     private IAntMessage DecodeMessage(byte[] data)
     {
+        Console.WriteLine("Received: " + BitConverter.ToString(data).Replace("-", " "));
         var messageId = data[2];
         var message = AntService.DeviceBoundMessages.FirstOrDefault(x => x.MessageId == messageId);
         return message ?? new UnknownMessage(data);
     }
 
-    private void StartReadThread()
+    private void Start()
     {
-        mReadThread = new Thread(async () => { await Start(); });
+        mReadThread = new Thread(async () => { await StartReadThread(); });
         mReadThread.Start();
+
+        Task.Run(async () =>
+        {
+            Console.WriteLine("Starting");
+            Thread.Sleep(250);
+            Console.WriteLine("Sending reset");
+
+            await SendMessageAsync(new RequestMessage(RequestMessageType.ANT_VERSION));
+            await SendMessageAsync(new RequestMessage(RequestMessageType.SERIAL_NUMBER));
+            await SendMessageAsync(new RequestMessage(RequestMessageType.CAPABILITIES));
+
+            Console.WriteLine("Sent reset");
+        });
     }
 
-    private async Task Start()
+    private async Task StartReadThread()
     {
         while (mDevice.IsConnected)
         {
             var data = mDevice.Read();
-            var message = await ReceiveMessageAsync(data);
-            if (message is EventResponseMessage eventResponseMessage)
-            {
-                var source = mAwaitingMessages
-                    .FirstOrDefault(x => x.Key.MessageId == eventResponseMessage.OriginalMessage).Value;
-                if (source == null)
-                    continue;
+            if (data == null || data.Length == 0) break;
 
-                source.SetResult(message);
+            var message = await ReceiveMessageAsync(data);
+            switch (message)
+            {
+                case EventResponseMessage eventResponseMessage:
+                {
+                    var source = mAwaitingMessages
+                        .FirstOrDefault(x => x.Key.MessageId == eventResponseMessage.OriginalMessage).Value;
+                    if (source == null)
+                        continue;
+
+                    source.SetResult(message);
+                    break;
+                }
+                case AntVersionMessage versionMessage:
+                    AntVersion = versionMessage.Version;
+                    break;
+                case SerialNumberMessage serialNumberMessage:
+                    SerialNumber = BitConverter.ToString(serialNumberMessage.SerialNumber).Replace("-", "");
+                    break;
+                case CapabilitiesMessage capabilitiesMessage:
+                    Capabilities = capabilitiesMessage.Capabilities;
+                    break;
             }
 
             mMessageReceivedEventManager.HandleEvent(this, new AntMessageReceivedEventArgs(message),
                 nameof(MessageReceived));
         }
+    }
+
+    /// <inheritdoc />
+    public override int GetHashCode()
+    {
+        return mDevice.VendorId ^ mDevice.ProductId;
     }
 }

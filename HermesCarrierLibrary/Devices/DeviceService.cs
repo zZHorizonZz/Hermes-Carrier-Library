@@ -1,12 +1,9 @@
 ﻿using HermesCarrierLibrary.Devices.Ant;
-using HermesCarrierLibrary.Devices.Ant.Channel;
 using HermesCarrierLibrary.Devices.Ant.Dongle;
-using HermesCarrierLibrary.Devices.Ant.Enum;
-using HermesCarrierLibrary.Devices.Ant.EventArgs;
 using HermesCarrierLibrary.Devices.Ant.Interfaces;
-using HermesCarrierLibrary.Devices.Ant.Messages.Client;
 using HermesCarrierLibrary.Devices.Ant.Util;
 using HermesCarrierLibrary.Devices.Shared;
+using DeviceType = HermesCarrierLibrary.Devices.Shared.DeviceType;
 #if ANDROID
 using HermesCarrierLibrary.Platforms.Android.Devices;
 #endif
@@ -27,7 +24,42 @@ public class DeviceService
             throw new NullReferenceException("UsbService is null");
 
         AntService = new AntService(UsbService);
-        AntService.TransmitterStatusChanged += OnTransmitterStatusChanged;
+    }
+
+    private readonly WeakEventManager mDeviceConnected = new();
+    private readonly WeakEventManager mDeviceDisconnected = new();
+    private readonly WeakEventManager mDevicePermissionGranted = new();
+    private readonly WeakEventManager mDevicePermissionDenied = new();
+    private readonly WeakEventManager mDeviceDetected = new();
+
+    public event EventHandler<DeviceEventArgs> DeviceConnected
+    {
+        add => mDeviceConnected.AddEventHandler(value);
+        remove => mDeviceConnected.RemoveEventHandler(value);
+    }
+
+    public event EventHandler<DeviceEventArgs> DeviceDisconnected
+    {
+        add => mDeviceDisconnected.AddEventHandler(value);
+        remove => mDeviceDisconnected.RemoveEventHandler(value);
+    }
+
+    public event EventHandler<DeviceEventArgs> DevicePermissionGranted
+    {
+        add => mDevicePermissionGranted.AddEventHandler(value);
+        remove => mDevicePermissionGranted.RemoveEventHandler(value);
+    }
+
+    public event EventHandler<DeviceEventArgs> DevicePermissionDenied
+    {
+        add => mDevicePermissionDenied.AddEventHandler(value);
+        remove => mDevicePermissionDenied.RemoveEventHandler(value);
+    }
+
+    public event EventHandler<DeviceEventArgs> DeviceDetected
+    {
+        add => mDeviceDetected.AddEventHandler(value);
+        remove => mDeviceDetected.RemoveEventHandler(value);
     }
 
     public IUsbService? UsbService { get; init; }
@@ -35,60 +67,32 @@ public class DeviceService
 
     public void OnConnectSerial(object? sender, UsbActionEventArgs args)
     {
-        Console.WriteLine("OnConnectSerial");
+        var deviceType = DeviceType.Usb;
         if (args.Device.IsAntDongle())
         {
-            Console.WriteLine("OnConnectSerial - IsAntDongle");
+            deviceType = DeviceType.Ant;
             var transmitter = new AntDongleTransmitter(args.Device);
             AntService.ConnectTransmitter(transmitter);
-            return;
         }
 
-        Console.WriteLine("OnConnectSerial - End");
+        mDeviceConnected.HandleEvent(this,
+            new DeviceEventArgs(args.Device, DeviceEventArgs.DeviceAction.DeviceConnected, deviceType),
+            nameof(DeviceConnected));
     }
 
     public void OnDisconnectSerial(object? sender, UsbActionEventArgs args)
     {
+        var deviceType = DeviceType.Usb;
+
         if (args.Device.IsAntDongle())
         {
+            deviceType = DeviceType.Ant;
+            var transmitter = new AntDongleTransmitter(args.Device);
+            AntService.DisconnectTransmitter(transmitter);
         }
-    }
 
-    public void OnTransmitterStatusChanged(object? sender, AntTransmitterStatusChangedEventArgs args)
-    {
-        var transmitter = args.Transmitter;
-        Console.WriteLine($"OnTransmitterStatusChanged: {transmitter.IsConnected}");
-
-        Task.Run(async () =>
-        {
-            await transmitter.SendMessageAsync(new ResetSystemMessage());
-            Thread.Sleep(500);
-            await transmitter.SendMessageAsync(new SetNetworkKeyMessage(1,
-                new byte[] { 0xF9, 0xED, 0x22, 0xB8, 0xFD, 0x56, 0x67, 0xCD }));
-            var channel = new Channel(0, 1, ChannelType.TransmitChannel, ExtendedAssignmentType.UNKNOWN, 0x2000,
-                0x03);
-
-            await transmitter.OpenChannelAsync(channel);
-
-            Thread.Sleep(500);
-            var lastAcknowledgeTime = DateTime.Now;
-            while (transmitter.IsConnected)
-            {
-                if (DateTime.Now > lastAcknowledgeTime.AddSeconds(1))
-                {
-                    Console.WriteLine("Sending Acknowledge");
-                    await channel.SendMessageAsync(new AcknowledgedDataMessage(new byte[]
-                        { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }));
-                    lastAcknowledgeTime = DateTime.Now;
-                }
-                else
-                {
-                    await channel.SendMessageAsync(new BroadcastDataMessage(new byte[]
-                        { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff }));
-                }
-
-                Thread.Sleep(250);
-            }
-        });
+        mDeviceDisconnected.HandleEvent(this,
+            new DeviceEventArgs(args.Device, DeviceEventArgs.DeviceAction.DeviceDisconnected, deviceType),
+            nameof(DeviceDisconnected));
     }
 }

@@ -36,7 +36,7 @@ public class CapabilitiesMessage : AntMessage
         for (var i = 0; i < 32; i++)
         {
             if ((optionBytes & (1 << i)) != 0)
-                capabilities.Add((Capabilities)i);
+                capabilities.Add((Capabilities)(optionBytes & (1 << i)));
         }
 
         Capabilities = capabilities.ToArray();

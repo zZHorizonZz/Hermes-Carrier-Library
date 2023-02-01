@@ -4,9 +4,7 @@ namespace HermesCarrierLibrary.Devices.Ant.Interfaces;
 
 public interface IAntService
 {
-    IAntTransmitter? CurrentTransmitter { get; }
-
-    event EventHandler<AntTransmitterStatusChangedEventArgs> TransmitterStatusChanged;
+    IDictionary<int, IAntTransmitter> Transmitters { get; }
 
     IAntTransmitter[] DetectTransmitters();
 

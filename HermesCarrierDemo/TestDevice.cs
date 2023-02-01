@@ -84,6 +84,19 @@ public class TestDevice
 
         channel.MessageReceived += OnMessageReceived;
         await transmitter.OpenChannelAsync(channel);
+        Thread.Sleep(250);
+        StartHeartbeat(channel);
+    }
+
+    public void StartHeartbeat(IAntChannel channel)
+    {
+        var timer = new Timer(async _ => await Heartbeat(channel), null, 0, 5000);
+    }
+
+    public async Task Heartbeat(IAntChannel channel)
+    {
+        await channel.SendMessageAsync(new BroadcastDataMessage(new byte[]
+            { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }));
     }
 
     private void OnMessageReceived(object sender, AntMessageReceivedEventArgs e)

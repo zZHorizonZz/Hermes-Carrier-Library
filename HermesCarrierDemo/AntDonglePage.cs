@@ -33,28 +33,36 @@ public class AntDonglePage : ContentPage
             }
         };
 
-        Content = new StackLayout
+        Content = new ScrollView()
         {
-            HorizontalOptions = LayoutOptions.Fill,
-            Padding = 16,
-            BackgroundColor = Color.FromArgb("#37505C"),
-            Children =
+            Content = new StackLayout
             {
-                mDevicesCountLabel,
-                new Entry { Placeholder = "Device number", TextColor = Colors.White }.Bind(Entry.TextProperty,
-                    nameof(mViewModel.DeviceNumber)),
-                new Entry { Placeholder = "Device type", TextColor = Colors.White }.Bind(Entry.TextProperty,
-                    nameof(mViewModel.DeviceType)),
-                new Entry { Placeholder = "Transmission type", TextColor = Colors.White }.Bind(Entry.TextProperty,
-                    nameof(mViewModel.TransmissionType)),
-                new Button
+                HorizontalOptions = LayoutOptions.Fill,
+                Padding = 16,
+                BackgroundColor = Color.FromArgb("#37505C"),
+                Children =
                 {
-                    Text = "Connect", TextColor = Colors.White, BackgroundColor = Color.FromArgb("#FF0000"),
-                    Command = mViewModel.ConnectCommand
-                },
-                new ScrollView
-                {
-                    Content = new VerticalStackLayout().Assign(out mValuesListView)
+                    mDevicesCountLabel,
+                    new Entry { Placeholder = "Device number", TextColor = Colors.White }.Bind(Entry.TextProperty,
+                        nameof(mViewModel.DeviceNumber)),
+                    new Entry { Placeholder = "Device type", TextColor = Colors.White }.Bind(Entry.TextProperty,
+                        nameof(mViewModel.DeviceType)),
+                    new Entry { Placeholder = "Transmission type", TextColor = Colors.White }.Bind(Entry.TextProperty,
+                        nameof(mViewModel.TransmissionType)),
+                    new Button
+                    {
+                        Text = "Connect", TextColor = Colors.White, BackgroundColor = Color.FromArgb("#FF0000"),
+                        Command = mViewModel.ConnectCommand
+                    },
+                    new Label().FormattedText(
+                        new Span { Text = "Ant Version: ", TextColor = Color.FromArgb("#FFEAD0") },
+                        new Span().Bind(Span.TextProperty, nameof(mViewModel.AntVersion)),
+                        new Span { Text = "\nSerial Number: ", TextColor = Color.FromArgb("#FFEAD0") },
+                        new Span().Bind(Span.TextProperty, nameof(mViewModel.SerialNumber)),
+                        new Span { Text = "\nCapabilities: ", TextColor = Color.FromArgb("#FFEAD0") },
+                        new Span().Bind(Span.TextProperty, nameof(mViewModel.Capabilities))
+                    ),
+                    new VerticalStackLayout().Assign(out mValuesListView)
                 }
             }
         };
