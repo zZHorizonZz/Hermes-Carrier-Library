@@ -1,4 +1,5 @@
-﻿using HermesCarrierLibrary.Devices.Ant.Util;
+﻿using HermesCarrierLibrary.Devices.Ant.Interfaces;
+using HermesCarrierLibrary.Devices.Ant.Util;
 
 namespace HermesCarrierLibrary.Devices.Ant.Messages;
 

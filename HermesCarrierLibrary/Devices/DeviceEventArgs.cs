@@ -3,8 +3,17 @@ using DeviceType = HermesCarrierLibrary.Devices.Shared.DeviceType;
 
 namespace HermesCarrierLibrary.Devices;
 
-public class DeviceEventArgs : System.EventArgs
+public class DeviceEventArgs : EventArgs
 {
+    public enum DeviceAction
+    {
+        DeviceConnected = 0,
+        DeviceDisconnected = 1,
+        DevicePermissionGranted = 2,
+        DevicePermissionDenied = 3,
+        DeviceDetected = 4
+    }
+
     public DeviceEventArgs(ISerial serial, DeviceAction action, DeviceType deviceType)
     {
         Serial = serial;
@@ -17,13 +26,4 @@ public class DeviceEventArgs : System.EventArgs
     public DeviceAction Action { get; }
 
     public DeviceType DeviceType { get; }
-
-    public enum DeviceAction
-    {
-        DeviceConnected = 0,
-        DeviceDisconnected = 1,
-        DevicePermissionGranted = 2,
-        DevicePermissionDenied = 3,
-        DeviceDetected = 4
-    }
 }

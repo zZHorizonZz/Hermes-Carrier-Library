@@ -2,7 +2,7 @@
 using HermesCarrierLibrary.Devices.Ant.Dongle;
 using HermesCarrierLibrary.Devices.Ant.Interfaces;
 using HermesCarrierLibrary.Devices.Ant.Util;
-using HermesCarrierLibrary.Devices.Shared;
+using HermesCarrierLibrary.Devices.Usb;
 using DeviceType = HermesCarrierLibrary.Devices.Shared.DeviceType;
 #if ANDROID
 using HermesCarrierLibrary.Platforms.Android.Devices;
@@ -12,6 +12,12 @@ namespace HermesCarrierLibrary.Devices;
 
 public class DeviceService
 {
+    private readonly WeakEventManager mDeviceConnected = new();
+    private readonly WeakEventManager mDeviceDetected = new();
+    private readonly WeakEventManager mDeviceDisconnected = new();
+    private readonly WeakEventManager mDevicePermissionDenied = new();
+    private readonly WeakEventManager mDevicePermissionGranted = new();
+
     public DeviceService()
     {
 #if ANDROID
@@ -26,11 +32,8 @@ public class DeviceService
         AntService = new AntService(UsbService);
     }
 
-    private readonly WeakEventManager mDeviceConnected = new();
-    private readonly WeakEventManager mDeviceDisconnected = new();
-    private readonly WeakEventManager mDevicePermissionGranted = new();
-    private readonly WeakEventManager mDevicePermissionDenied = new();
-    private readonly WeakEventManager mDeviceDetected = new();
+    public IUsbService? UsbService { get; init; }
+    public IAntService AntService { get; init; }
 
     public event EventHandler<DeviceEventArgs> DeviceConnected
     {
@@ -61,9 +64,6 @@ public class DeviceService
         add => mDeviceDetected.AddEventHandler(value);
         remove => mDeviceDetected.RemoveEventHandler(value);
     }
-
-    public IUsbService? UsbService { get; init; }
-    public IAntService AntService { get; init; }
 
     public void OnConnectSerial(object? sender, UsbActionEventArgs args)
     {

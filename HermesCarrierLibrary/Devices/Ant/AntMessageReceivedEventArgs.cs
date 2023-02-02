@@ -1,4 +1,6 @@
-﻿namespace HermesCarrierLibrary.Devices.Ant;
+﻿using HermesCarrierLibrary.Devices.Ant.Interfaces;
+
+namespace HermesCarrierLibrary.Devices.Ant;
 
 public class AntMessageReceivedEventArgs : System.EventArgs
 {

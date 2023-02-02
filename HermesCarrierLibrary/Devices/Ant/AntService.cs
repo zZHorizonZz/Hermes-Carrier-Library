@@ -1,11 +1,10 @@
 ﻿using HermesCarrierLibrary.Devices.Ant.Dongle;
-using HermesCarrierLibrary.Devices.Ant.EventArgs;
 using HermesCarrierLibrary.Devices.Ant.Interfaces;
 using HermesCarrierLibrary.Devices.Ant.Messages.Client;
 using HermesCarrierLibrary.Devices.Ant.Messages.Device;
 using HermesCarrierLibrary.Devices.Ant.Messages.Shared;
 using HermesCarrierLibrary.Devices.Ant.Util;
-using HermesCarrierLibrary.Devices.Shared;
+using HermesCarrierLibrary.Devices.Usb;
 using ChannelIdMessage = HermesCarrierLibrary.Devices.Ant.Messages.Client.ChannelIdMessage;
 
 namespace HermesCarrierLibrary.Devices.Ant;
@@ -87,15 +86,15 @@ public class AntService : IAntService
         new BurstTransferDataMessage()
     };
 
-    /// <inheritdoc />
-    public IDictionary<int, IAntTransmitter> Transmitters { get; } = new Dictionary<int, IAntTransmitter>();
-
     private readonly IUsbService mUsbService;
 
     public AntService(IUsbService usbService)
     {
         mUsbService = usbService;
     }
+
+    /// <inheritdoc />
+    public IDictionary<int, IAntTransmitter> Transmitters { get; } = new Dictionary<int, IAntTransmitter>();
 
     /// <inheritdoc />
     public IAntTransmitter[] DetectTransmitters()

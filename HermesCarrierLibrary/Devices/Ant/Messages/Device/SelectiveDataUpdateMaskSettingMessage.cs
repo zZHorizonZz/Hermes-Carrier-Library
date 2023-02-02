@@ -2,13 +2,13 @@
 
 public class SelectiveDataUpdateMaskSettingMessage : AntMessage
 {
-    public byte SubMessageId { get; set; }
-    public byte[] SduMask { get; set; }
-
     /// <inheritdoc />
     public SelectiveDataUpdateMaskSettingMessage() : base(0x7B, 9)
     {
     }
+
+    public byte SubMessageId { get; set; }
+    public byte[] SduMask { get; set; }
 
     /// <inheritdoc />
     public override void DecodePayload(BinaryReader payload)

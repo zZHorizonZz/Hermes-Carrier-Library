@@ -2,6 +2,7 @@
 using Android.Content;
 using Android.Hardware.Usb;
 using HermesCarrierLibrary.Devices.Shared;
+using HermesCarrierLibrary.Devices.Usb;
 
 namespace HermesCarrierLibrary.Platforms.Android.Devices;
 

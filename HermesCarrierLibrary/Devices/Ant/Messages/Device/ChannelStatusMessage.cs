@@ -2,12 +2,12 @@
 
 public class ChannelStatusMessage : AntMessage
 {
-    public byte ChannelStatus { get; set; }
-
     /// <inheritdoc />
     public ChannelStatusMessage() : base(0x52, 2)
     {
     }
+
+    public byte ChannelStatus { get; set; }
 
     /// <inheritdoc />
     public override void DecodePayload(BinaryReader payload)

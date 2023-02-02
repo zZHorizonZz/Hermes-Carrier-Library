@@ -2,13 +2,6 @@
 
 public class BurstTransferDataMessage : AntMessage
 {
-    public byte SequenceNumber { get; set; }
-    public byte[] Data { get; set; }
-    public bool Extended { get; set; }
-    public ushort DeviceNumber { get; set; }
-    public byte DeviceType { get; set; }
-    public byte TransmissionType { get; set; }
-
     /// <inheritdoc />
     public BurstTransferDataMessage() : base(0x50, 15)
     {
@@ -36,6 +29,13 @@ public class BurstTransferDataMessage : AntMessage
         DeviceType = deviceType;
         TransmissionType = transmissionType;
     }
+
+    public byte SequenceNumber { get; set; }
+    public byte[] Data { get; set; }
+    public bool Extended { get; set; }
+    public ushort DeviceNumber { get; set; }
+    public byte DeviceType { get; set; }
+    public byte TransmissionType { get; set; }
 
     /// <inheritdoc />
     public override void DecodePayload(BinaryReader payload)

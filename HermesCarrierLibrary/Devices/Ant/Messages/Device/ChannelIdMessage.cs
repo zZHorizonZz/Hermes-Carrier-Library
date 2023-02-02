@@ -2,14 +2,14 @@
 
 public class ChannelIdMessage : AntMessage
 {
-    public ushort DeviceNumber { get; set; }
-    public byte DeviceType { get; set; }
-    public byte TransmissionType { get; set; }
-
     /// <inheritdoc />
     public ChannelIdMessage() : base(0x51, 5)
     {
     }
+
+    public ushort DeviceNumber { get; set; }
+    public byte DeviceType { get; set; }
+    public byte TransmissionType { get; set; }
 
     /// <inheritdoc />
     public override void DecodePayload(BinaryReader payload)

@@ -1,7 +1,6 @@
 ﻿using CommunityToolkit.Maui.Markup;
-using HermesCarrierDemo;
 
-namespace Demo;
+namespace HermesCarrierDemo;
 
 public class AntDonglePage : ContentPage
 {

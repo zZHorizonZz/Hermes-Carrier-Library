@@ -1,4 +1,4 @@
-﻿namespace HermesCarrierLibrary.Devices.Ant;
+﻿namespace HermesCarrierLibrary.Devices.Ant.Interfaces;
 
 /// <summary>
 ///     The IAntMessage interface is used to define the properties and methods for encoding and decoding ANT messages.

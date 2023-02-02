@@ -1,6 +1,4 @@
-﻿using HermesCarrierLibrary.Devices.Ant.EventArgs;
-
-namespace HermesCarrierLibrary.Devices.Ant.Interfaces;
+﻿namespace HermesCarrierLibrary.Devices.Ant.Interfaces;
 
 public interface IAntService
 {

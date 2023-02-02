@@ -2,12 +2,12 @@
 
 public class SerialErrorMessage : AntMessage
 {
-    public byte ErrorNumber { get; set; }
-
     /// <inheritdoc />
     public SerialErrorMessage() : base(0xAE, 1)
     {
     }
+
+    public byte ErrorNumber { get; set; }
 
     /// <inheritdoc />
     public override void DecodePayload(BinaryReader payload)

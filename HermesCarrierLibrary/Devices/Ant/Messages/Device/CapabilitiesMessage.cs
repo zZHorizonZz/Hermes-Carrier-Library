@@ -4,17 +4,17 @@ namespace HermesCarrierLibrary.Devices.Ant.Messages.Device;
 
 public class CapabilitiesMessage : AntMessage
 {
+    /// <inheritdoc />
+    public CapabilitiesMessage() : base(0x54, 64)
+    {
+    }
+
     public byte MaxChannels { get; set; }
     public byte MaxNetworks { get; set; }
     public byte MaxSendRcoreChannels { get; set; }
 
     public Capabilities[] Capabilities { get; set; }
     public bool ReactiveNotifications { get; set; }
-
-    /// <inheritdoc />
-    public CapabilitiesMessage() : base(0x54, 64)
-    {
-    }
 
     /// <inheritdoc />
     public override void DecodePayload(BinaryReader payload)
@@ -34,10 +34,8 @@ public class CapabilitiesMessage : AntMessage
                            (fourthOptionByte << 24);
         var capabilities = new List<Capabilities>();
         for (var i = 0; i < 32; i++)
-        {
             if ((optionBytes & (1 << i)) != 0)
                 capabilities.Add((Capabilities)(optionBytes & (1 << i)));
-        }
 
         Capabilities = capabilities.ToArray();
         ReactiveNotifications = payload.ReadByte() != 0;

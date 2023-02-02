@@ -1,4 +1,6 @@
-﻿namespace HermesCarrierLibrary.Devices.Ant.Messages;
+﻿using HermesCarrierLibrary.Devices.Ant.Interfaces;
+
+namespace HermesCarrierLibrary.Devices.Ant.Messages;
 
 /// <summary>
 ///     This interface defines the methods that are required to communicate with an ANT device.

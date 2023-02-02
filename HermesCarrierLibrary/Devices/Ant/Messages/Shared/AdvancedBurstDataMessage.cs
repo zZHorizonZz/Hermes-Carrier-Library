@@ -2,13 +2,13 @@
 
 public class AdvancedBurstDataMessage : AntMessage
 {
-    public byte SequenceNumber { get; set; }
-    public byte[] Data { get; set; }
-
     /// <inheritdoc />
     public AdvancedBurstDataMessage() : base(0x72, 64)
     {
     }
+
+    public byte SequenceNumber { get; set; }
+    public byte[] Data { get; set; }
 
     /// <inheritdoc />
     public override void DecodePayload(BinaryReader payload)

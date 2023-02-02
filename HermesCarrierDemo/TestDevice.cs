@@ -4,6 +4,8 @@ using HermesCarrierLibrary.Devices.Ant.Enum;
 using HermesCarrierLibrary.Devices.Ant.Interfaces;
 using HermesCarrierLibrary.Devices.Ant.Messages.Client;
 using HermesCarrierLibrary.Devices.Ant.Messages.Device;
+using HermesCarrierLibrary.Devices.Ant.Messages.Shared;
+using Microsoft.Extensions.Logging;
 using ChannelIdMessage = HermesCarrierLibrary.Devices.Ant.Messages.Client.ChannelIdMessage;
 
 namespace HermesCarrierDemo;

@@ -4,13 +4,13 @@ namespace HermesCarrierLibrary.Devices.Ant.Messages.Device;
 
 public class EncryptionModeParametersMessage : AntMessage
 {
-    public EncryptionParameter EncryptionParameter { get; set; }
-    public byte[] Data { get; set; }
-
     /// <inheritdoc />
     public EncryptionModeParametersMessage() : base(0x7D, 20)
     {
     }
+
+    public EncryptionParameter EncryptionParameter { get; set; }
+    public byte[] Data { get; set; }
 
     /// <inheritdoc />
     public override void DecodePayload(BinaryReader payload)

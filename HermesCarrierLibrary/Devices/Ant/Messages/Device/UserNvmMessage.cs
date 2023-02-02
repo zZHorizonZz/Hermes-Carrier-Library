@@ -2,12 +2,12 @@
 
 public class UserNvmMessage : AntMessage
 {
-    public byte[] Data { get; set; }
-
     /// <inheritdoc />
     public UserNvmMessage() : base(0x7C, 64)
     {
     }
+
+    public byte[] Data { get; set; }
 
     /// <inheritdoc />
     public override void DecodePayload(BinaryReader payload)

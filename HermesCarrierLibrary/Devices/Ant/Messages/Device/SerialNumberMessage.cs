@@ -2,12 +2,12 @@
 
 public class SerialNumberMessage : AntMessage
 {
-    public byte[] SerialNumber { get; set; }
-
     /// <inheritdoc />
     public SerialNumberMessage() : base(0x61, 4)
     {
     }
+
+    public byte[] SerialNumber { get; set; }
 
     /// <inheritdoc />
     public override void DecodePayload(BinaryReader payload)

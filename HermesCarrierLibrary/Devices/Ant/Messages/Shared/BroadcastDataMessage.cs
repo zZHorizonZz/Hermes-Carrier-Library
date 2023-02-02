@@ -1,4 +1,4 @@
-﻿namespace HermesCarrierLibrary.Devices.Ant.Messages.Client;
+﻿namespace HermesCarrierLibrary.Devices.Ant.Messages.Shared;
 
 public class BroadcastDataMessage : AntMessage
 {

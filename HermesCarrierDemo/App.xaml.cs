@@ -1,6 +1,4 @@
-﻿using Demo;
-
-namespace HermesCarrierDemo;
+﻿namespace HermesCarrierDemo;
 
 public partial class App : Application
 {

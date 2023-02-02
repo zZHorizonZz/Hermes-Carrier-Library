@@ -143,15 +143,11 @@ public class AntDongleTransmitter : IAntTransmitter
 
         Task.Run(async () =>
         {
-            Console.WriteLine("Starting");
-            Thread.Sleep(250);
-            Console.WriteLine("Sending reset");
-
+            Thread.Sleep(100);
+            
             await SendMessageAsync(new RequestMessage(RequestMessageType.ANT_VERSION));
             await SendMessageAsync(new RequestMessage(RequestMessageType.SERIAL_NUMBER));
             await SendMessageAsync(new RequestMessage(RequestMessageType.CAPABILITIES));
-
-            Console.WriteLine("Sent reset");
         });
     }
 
@@ -188,6 +184,11 @@ public class AntDongleTransmitter : IAntTransmitter
 
             mMessageReceivedEventManager.HandleEvent(this, new AntMessageReceivedEventArgs(message),
                 nameof(MessageReceived));
+        }
+        
+        foreach (var channel in ActiveChannels.Values)
+        {
+            await CloseChannelAsync(channel);
         }
     }
 

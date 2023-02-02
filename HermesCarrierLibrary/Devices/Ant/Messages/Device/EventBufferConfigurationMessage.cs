@@ -2,14 +2,14 @@
 
 public class EventBufferConfigurationMessage : AntMessage
 {
-    public byte BufferConfig { get; set; }
-    public ushort BufferSize { get; set; }
-    public ushort BufferTime { get; set; }
-
     /// <inheritdoc />
     public EventBufferConfigurationMessage() : base(0x74, 6)
     {
     }
+
+    public byte BufferConfig { get; set; }
+    public ushort BufferSize { get; set; }
+    public ushort BufferTime { get; set; }
 
     /// <inheritdoc />
     public override void DecodePayload(BinaryReader payload)
