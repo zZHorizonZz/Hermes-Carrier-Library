@@ -12,7 +12,7 @@ public class UsbActionEventArgs : EventArgs
         DevicePermissionDenied = 3
     }
 
-    public UsbActionEventArgs(UsbAction action, ISerial device)
+    public UsbActionEventArgs(UsbAction action, IUsbDevice device)
     {
         Action = action;
         Device = device;
@@ -20,5 +20,5 @@ public class UsbActionEventArgs : EventArgs
 
     public UsbAction Action { get; }
 
-    public ISerial Device { get; }
+    public IUsbDevice Device { get; }
 }

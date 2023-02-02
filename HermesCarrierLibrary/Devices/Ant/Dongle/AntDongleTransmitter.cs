@@ -55,7 +55,7 @@ public class AntDongleTransmitter : IAntTransmitter
     public async Task OpenChannelAsync(IAntChannel channel)
     {
         if (ActiveChannels.ContainsKey(channel.Number))
-            throw new Exception("Channel already open");
+            throw new Exception("Channel is already bound to this transmitter");
 
         await channel.Open();
 
@@ -66,12 +66,18 @@ public class AntDongleTransmitter : IAntTransmitter
     /// <inheritdoc />
     public async Task CloseChannelAsync(IAntChannel channel)
     {
-        if (!ActiveChannels.ContainsKey(channel.Number))
-            throw new Exception("Channel not open");
+        if (!IsChannelOpen(channel.Number))
+            throw new Exception("Channel is not bound to this transmitter");
 
         MessageReceived -= channel.OnMessageReceived;
         await channel.Close();
         ActiveChannels.Remove(channel.Number);
+    }
+
+    /// <inheritdoc />
+    public bool IsChannelOpen(byte channelNumber)
+    {
+        return ActiveChannels.ContainsKey(channelNumber);
     }
 
     /// <inheritdoc />
@@ -144,7 +150,7 @@ public class AntDongleTransmitter : IAntTransmitter
         Task.Run(async () =>
         {
             Thread.Sleep(100);
-            
+
             await SendMessageAsync(new RequestMessage(RequestMessageType.ANT_VERSION));
             await SendMessageAsync(new RequestMessage(RequestMessageType.SERIAL_NUMBER));
             await SendMessageAsync(new RequestMessage(RequestMessageType.CAPABILITIES));
@@ -163,12 +169,18 @@ public class AntDongleTransmitter : IAntTransmitter
             {
                 case EventResponseMessage eventResponseMessage:
                 {
-                    var source = mAwaitingMessages
-                        .FirstOrDefault(x => x.Key.MessageId == eventResponseMessage.OriginalMessage).Value;
-                    if (source == null)
-                        continue;
+                    var (key, value) = mAwaitingMessages
+                        .FirstOrDefault(x => x.Key.MessageId == eventResponseMessage.OriginalMessage);
 
-                    source.SetResult(message);
+                    if (value != null)
+                    {
+                        mAwaitingMessages.Remove(key);
+                        if (!value.TrySetResult(message))
+                        {
+                            Console.WriteLine("Failed to set result");
+                        }
+                    }
+
                     break;
                 }
                 case AntVersionMessage versionMessage:
@@ -185,7 +197,7 @@ public class AntDongleTransmitter : IAntTransmitter
             mMessageReceivedEventManager.HandleEvent(this, new AntMessageReceivedEventArgs(message),
                 nameof(MessageReceived));
         }
-        
+
         foreach (var channel in ActiveChannels.Values)
         {
             await CloseChannelAsync(channel);

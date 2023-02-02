@@ -1,26 +1,22 @@
-﻿using Android.App;
-using Android.Content;
+﻿using Android.Content;
 using Android.Hardware.Usb;
-using HermesCarrierLibrary.Devices.Shared;
 using HermesCarrierLibrary.Devices.Usb;
 
 namespace HermesCarrierLibrary.Platforms.Android.Devices;
 
-public class AndroidUsbService : IUsbService
+public class DroidUsbService : IUsbService
 {
-    public const string ActionUsbPermission = "cz.palstat.quickstat.USB_PERMISSION";
-
     private readonly Context mContext;
     private readonly WeakEventManager mDeviceAttached = new();
     private readonly WeakEventManager mDeviceDetached = new();
     private readonly WeakEventManager mDevicePermissionDenied = new();
 
     private readonly WeakEventManager mDevicePermissionGranted = new();
-    private readonly IDictionary<int, UsbSerial> mDevices = new Dictionary<int, UsbSerial>();
+    private readonly IDictionary<int, IUsbDevice> mDevices = new Dictionary<int, IUsbDevice>();
     private readonly UsbBroadcastReceiver mUsbBroadcastReceiver;
     private readonly UsbManager mUsbManager;
 
-    public AndroidUsbService(Context context)
+    public DroidUsbService(Context context)
     {
         mContext = context;
         mUsbManager = (UsbManager)context.GetSystemService(Context.UsbService);
@@ -52,21 +48,21 @@ public class AndroidUsbService : IUsbService
     }
 
     /// <inheritdoc />
-    public IEnumerable<ISerial> GetDevices()
+    public IEnumerable<IUsbDevice> GetDevices()
     {
-        var devices = mUsbManager.DeviceList.Values;
+        var knownDevices = mDevices.Values;
+        var usbDevices = mUsbManager.DeviceList.Values;
 
-        foreach (var device in devices)
-            if (mDevices.TryGetValue(device.DeviceId, out var value))
-            {
-                yield return value;
-            }
-            else
-            {
-                var serial = new UsbSerial(device);
-                mDevices.Add(device.DeviceId, serial);
-                yield return serial;
-            }
+        foreach (var usbDevice in usbDevices)
+        {
+            if (knownDevices.Any(d => d.DeviceId == usbDevice.DeviceId))
+                continue;
+
+            var device = new DroidUsbDevice(usbDevice, mContext, mUsbManager);
+            mDevices.Add(usbDevice.DeviceId, device);
+        }
+
+        return mDevices.Values;
     }
 
     public void Register()
@@ -74,7 +70,7 @@ public class AndroidUsbService : IUsbService
         var filter = new IntentFilter();
         filter.AddAction(UsbManager.ActionUsbDeviceAttached);
         filter.AddAction(UsbManager.ActionUsbDeviceDetached);
-        filter.AddAction(ActionUsbPermission);
+        filter.AddAction(DroidUsbDevice.ActionUsbPermission);
         mContext.RegisterReceiver(mUsbBroadcastReceiver, filter);
     }
 
@@ -86,7 +82,6 @@ public class AndroidUsbService : IUsbService
     public void OnDevicePermissionGranted(UsbDevice device)
     {
         var serial = mDevices[device.DeviceId];
-        serial.Open(mContext);
 
         mDevicePermissionGranted.HandleEvent(this,
             new UsbActionEventArgs(UsbActionEventArgs.UsbAction.DevicePermissionGranted, serial),
@@ -104,36 +99,21 @@ public class AndroidUsbService : IUsbService
 
     public void OnDeviceAttached(UsbDevice device)
     {
-        var serial = new UsbSerial(device);
+        var serial = new DroidUsbDevice(device, mContext, mUsbManager);
         mDevices.Add(device.DeviceId, serial);
 
         mDeviceAttached.HandleEvent(this,
             new UsbActionEventArgs(UsbActionEventArgs.UsbAction.DeviceAttached, serial),
             nameof(DeviceAttached));
-
-        if (mUsbManager.HasPermission(device))
-            OnDevicePermissionGranted(device);
-        else
-            RequestPermission(device);
     }
 
     public void OnDeviceDetached(UsbDevice device)
     {
         var serial = mDevices[device.DeviceId];
         mDevices.Remove(device.DeviceId);
-        serial.Close();
 
         mDeviceDetached.HandleEvent(this,
             new UsbActionEventArgs(UsbActionEventArgs.UsbAction.DeviceDetached, serial),
             nameof(DeviceDetached));
-    }
-
-    public void RequestPermission(UsbDevice device)
-    {
-        var pendingIntent = PendingIntent.GetBroadcast(mContext,
-            0,
-            new Intent(ActionUsbPermission),
-            PendingIntentFlags.Mutable);
-        mUsbManager.RequestPermission(device, pendingIntent);
     }
 }

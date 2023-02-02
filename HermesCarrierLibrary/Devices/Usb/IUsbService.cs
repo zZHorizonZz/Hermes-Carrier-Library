@@ -9,5 +9,5 @@ public interface IUsbService
     event EventHandler<UsbActionEventArgs> DeviceAttached;
     event EventHandler<UsbActionEventArgs> DeviceDetached;
 
-    IEnumerable<ISerial> GetDevices();
+    IEnumerable<IUsbDevice> GetDevices();
 }

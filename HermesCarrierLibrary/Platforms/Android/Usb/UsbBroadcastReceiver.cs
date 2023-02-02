@@ -5,9 +5,9 @@ namespace HermesCarrierLibrary.Platforms.Android.Devices;
 
 public class UsbBroadcastReceiver : BroadcastReceiver
 {
-    private readonly AndroidUsbService mService;
+    private readonly DroidUsbService mService;
 
-    public UsbBroadcastReceiver(AndroidUsbService service)
+    public UsbBroadcastReceiver(DroidUsbService service)
     {
         mService = service;
     }
@@ -21,7 +21,7 @@ public class UsbBroadcastReceiver : BroadcastReceiver
         {
             case null:
                 return;
-            case AndroidUsbService.ActionUsbPermission:
+            case DroidUsbDevice.ActionUsbPermission:
             {
                 if (intent?.GetBooleanExtra("permission", false) == true)
                 {
@@ -39,7 +39,7 @@ public class UsbBroadcastReceiver : BroadcastReceiver
 
             case UsbManager.ActionUsbDeviceDetached:
             {
-                if (intent?.GetParcelableExtra(UsbManager.ExtraDevice) is UsbDevice usbDevice)
+                if (intent?.GetParcelableExtra(UsbManager.ExtraDevice) is DroidUsbDevice usbDevice)
                     mService?.OnDeviceDetached(usbDevice);
 
                 break;
@@ -47,7 +47,7 @@ public class UsbBroadcastReceiver : BroadcastReceiver
 
             case UsbManager.ActionUsbDeviceAttached:
             {
-                if (intent?.GetParcelableExtra(UsbManager.ExtraDevice) is UsbDevice usbDevice)
+                if (intent?.GetParcelableExtra(UsbManager.ExtraDevice) is DroidUsbDevice usbDevice)
                     mService?.OnDeviceAttached(usbDevice);
 
                 break;

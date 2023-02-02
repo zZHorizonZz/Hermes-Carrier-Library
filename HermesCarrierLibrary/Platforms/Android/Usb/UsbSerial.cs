@@ -1,13 +1,14 @@
 ﻿using Android.Content;
 using Android.Hardware.Usb;
 using HermesCarrierLibrary.Devices.Shared;
+using HermesCarrierLibrary.Devices.Usb;
 using HermesCarrierLibrary.Platforms.Android.Devices.Util;
 using Java.Nio;
 using Buffer = System.Buffer;
 
 namespace HermesCarrierLibrary.Platforms.Android.Devices;
 
-public class UsbSerial : ISerial
+public class UsbDeviceImpl : ISerial, IUsbDevice
 {
     public const int TIMEOUT = 5000;
 
@@ -18,18 +19,18 @@ public class UsbSerial : ISerial
     private readonly object mReadLock = new();
     private readonly object mWriteLock = new();
 
-    private UsbDevice mUsbDevice;
+    private DroidUsbDevice mUsbDevice;
     private UsbDeviceConnection mUsbDeviceConnection;
 
-    private UsbEndpoint mUsbEndpointIn;
-    private UsbEndpoint mUsbEndpointOut;
-    private UsbInterface mUsbInterface;
+    private DroidUsbEndpoint mUsbEndpointIn;
+    private DroidUsbEndpoint mUsbEndpointOut;
+    private DroidUsbInterface mUsbInterface;
 
     private UsbManager mUsbManager;
 
-    private UsbRequest mUsbRequestIn;
+    private DroidUsbRequest mUsbRequestIn;
 
-    public UsbSerial(UsbDevice device)
+    public UsbDeviceImpl(DroidUsbDevice device)
     {
         Name = device.ProductName ?? device.DeviceName;
 
@@ -42,12 +43,6 @@ public class UsbSerial : ISerial
 
     /// <inheritdoc />
     public string Name { get; }
-
-    /// <inheritdoc />
-    public int VendorId { get; }
-
-    /// <inheritdoc />
-    public int ProductId { get; }
 
     public event EventHandler Opened
     {
@@ -112,6 +107,31 @@ public class UsbSerial : ISerial
         }
     }
 
+    /// <inheritdoc />
+    public int VendorId { get; }
+
+    /// <inheritdoc />
+    public int ProductId { get; }
+
+    public void Close()
+    {
+        if (!IsConnected) throw new Exception("Device not connected");
+
+        mUsbDeviceConnection.ReleaseInterface(mUsbInterface);
+        mUsbDeviceConnection.Close();
+        IsConnected = false;
+
+        mCloseEventManager.HandleEvent(this, EventArgs.Empty, nameof(Closed));
+    }
+
+    /// <inheritdoc />
+    public void SetBaudRate(int baudRate)
+    {
+        if (!IsConnected) throw new Exception("Device not connected");
+
+        mUsbDevice.DeviceClass.
+    }
+
     public void Open(Context? context)
     {
         mUsbManager = (UsbManager)context?.GetSystemService(Context.UsbService);
@@ -143,21 +163,10 @@ public class UsbSerial : ISerial
                           + Name + " EndpointIn: " + mUsbEndpointIn +
                           " EndpointOut: " + mUsbEndpointOut);
 
-        mUsbRequestIn = new UsbRequest();
+        mUsbRequestIn = new DroidUsbRequest();
         mUsbRequestIn.Initialize(mUsbDeviceConnection, mUsbEndpointIn);
         IsConnected = true;
 
         mOpenEventManager.HandleEvent(this, EventArgs.Empty, nameof(Opened));
-    }
-
-    public void Close()
-    {
-        if (!IsConnected) throw new Exception("Device not connected");
-
-        mUsbDeviceConnection.ReleaseInterface(mUsbInterface);
-        mUsbDeviceConnection.Close();
-        IsConnected = false;
-
-        mCloseEventManager.HandleEvent(this, EventArgs.Empty, nameof(Closed));
     }
 }

@@ -43,7 +43,7 @@ public partial class AntDongleViewModel : ObservableObject
     public async Task Connect()
     {
         if (mChannel is not null)
-            await mChannel.Close();
+            await mTransmitter.CloseChannelAsync(mChannel);
 
         mChannel = new Channel(0, 1, ChannelType.TransmitChannel, ExtendedAssignmentType.UNKNOWN, 0x2000,
             0x03);
@@ -63,6 +63,13 @@ public partial class AntDongleViewModel : ObservableObject
         Capabilities = mTransmitter.Capabilities
             .Select(capability => Enum.GetName(capability) ?? "Unknown" + $" ({(byte)capability:X2})")
             .Aggregate((a, b) => $"{a}\n{b}");
+    }
+
+    [RelayCommand]
+    public async Task Disconnect()
+    {
+        await mTransmitter.CloseChannelAsync(mChannel);
+        mChannel = null;
     }
 
     public void OnValueReceived(object sender, TestDevice.ValueReceivedEventArgs e)

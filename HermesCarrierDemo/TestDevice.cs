@@ -45,9 +45,12 @@ public class TestDevice
     public byte TransmissionType { get; init; } = 0x01;
 
     public event EventHandler<ValueReceivedEventArgs> ValueReceived;
+    private IAntTransmitter mTransmitter;
 
     public async Task Open(IAntTransmitter transmitter, IAntChannel channel)
     {
+        mTransmitter = transmitter;
+
         await transmitter.SendMessageAsync(new ResetSystemMessage());
         Thread.Sleep(500);
         await transmitter.SendMessageAsync(new SetNetworkKeyMessage(1,
@@ -97,8 +100,15 @@ public class TestDevice
 
     public async Task Heartbeat(IAntChannel channel)
     {
-        await channel.SendMessageAsync(new BroadcastDataMessage(new byte[]
+        var response = await channel.AwaitMessageOfTypeAsync<EventResponseMessage>(new BroadcastDataMessage(new byte[]
             { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }));
+
+        if (response.Type != EventResponseType.RESPONSE_NO_ERROR)
+        {
+            Console.WriteLine($"Failed to send heartbeat {response.Type}");
+            if (mTransmitter.IsChannelOpen(channel.Number))
+                await mTransmitter.CloseChannelAsync(channel);
+        }
     }
 
     private void OnMessageReceived(object sender, AntMessageReceivedEventArgs e)

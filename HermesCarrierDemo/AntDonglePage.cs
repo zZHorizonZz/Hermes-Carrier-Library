@@ -50,8 +50,13 @@ public class AntDonglePage : ContentPage
                         nameof(mViewModel.TransmissionType)),
                     new Button
                     {
-                        Text = "Connect", TextColor = Colors.White, BackgroundColor = Color.FromArgb("#FF0000"),
+                        Text = "Connect", TextColor = Colors.White, BackgroundColor = Color.FromArgb("#00FF00"),
                         Command = mViewModel.ConnectCommand
+                    },
+                    new Button()
+                    {
+                        Text = "Disconnect", TextColor = Colors.White, BackgroundColor = Color.FromArgb("#FF0000"),
+                        Command = mViewModel.DisconnectCommand
                     },
                     new Label().FormattedText(
                         new Span { Text = "Ant Version: ", TextColor = Color.FromArgb("#FFEAD0") },

@@ -48,4 +48,11 @@ public interface IAntTransmitter : IAntMessenger
     /// <param name="channel">The channel to close.</param>
     /// <returns>A task that represents the asynchronous operation.</returns>
     Task CloseChannelAsync(IAntChannel channel);
+
+    /// <summary>
+    ///     Checks if the channel is open.
+    /// </summary>
+    /// <param name="channelNumber">The channel number to check.</param>
+    /// <returns>True if the channel is open, false otherwise.</returns>
+    bool IsChannelOpen(byte channelNumber);
 }

@@ -10,11 +10,11 @@ public class AndroidDeviceService
 
         var context = Application.Context;
 
-        Current.UsbService = new AndroidUsbService(context);
+        Current.UsbService = new DroidUsbService(context);
         Current.UsbService.Register();
     }
 
     public static AndroidDeviceService? Current { get; }
 
-    public AndroidUsbService? UsbService { get; private set; }
+    public DroidUsbService? UsbService { get; private set; }
 }

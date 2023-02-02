@@ -16,16 +16,6 @@ public interface ISerial
     string Name { get; }
 
     /// <summary>
-    ///     Vendor ID of the device.
-    /// </summary>
-    int VendorId { get; }
-
-    /// <summary>
-    ///     Device ID of the device.
-    /// </summary>
-    int ProductId { get; }
-
-    /// <summary>
     ///     Occurs when the serial connection is opened.
     /// </summary>
     event EventHandler Opened;

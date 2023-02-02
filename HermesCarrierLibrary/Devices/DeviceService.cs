@@ -3,6 +3,8 @@ using HermesCarrierLibrary.Devices.Ant.Dongle;
 using HermesCarrierLibrary.Devices.Ant.Interfaces;
 using HermesCarrierLibrary.Devices.Ant.Util;
 using HermesCarrierLibrary.Devices.Usb;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using DeviceType = HermesCarrierLibrary.Devices.Shared.DeviceType;
 #if ANDROID
 using HermesCarrierLibrary.Platforms.Android.Devices;
@@ -12,6 +14,8 @@ namespace HermesCarrierLibrary.Devices;
 
 public class DeviceService
 {
+    public static readonly ILogger Logger = new LoggerFactory().CreateLogger<DeviceService>();
+
     private readonly WeakEventManager mDeviceConnected = new();
     private readonly WeakEventManager mDeviceDetected = new();
     private readonly WeakEventManager mDeviceDisconnected = new();
