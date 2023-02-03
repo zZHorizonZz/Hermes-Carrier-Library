@@ -3,7 +3,9 @@ using HermesCarrierLibrary.Devices.Ant.Enum;
 using HermesCarrierLibrary.Devices.Ant.Interfaces;
 using HermesCarrierLibrary.Devices.Ant.Messages.Client;
 using HermesCarrierLibrary.Devices.Ant.Messages.Device;
-using HermesCarrierLibrary.Devices.Shared;
+using HermesCarrierLibrary.Devices.Usb;
+using HermesCarrierLibrary.Devices.Usb.Enum;
+using Microsoft.Extensions.Logging;
 
 namespace HermesCarrierLibrary.Devices.Ant.Dongle;
 
@@ -12,25 +14,32 @@ public class AntDongleTransmitter : IAntTransmitter
     private readonly IDictionary<IAntMessage, TaskCompletionSource<IAntMessage>>
         mAwaitingMessages = new Dictionary<IAntMessage, TaskCompletionSource<IAntMessage>>();
 
-    private readonly ISerial mDevice;
+    private readonly ILogger<AntDongleTransmitter> mLogger = new LoggerFactory().CreateLogger<AntDongleTransmitter>();
+    private readonly IUsbDevice mDevice;
     private readonly WeakEventManager mMessageReceivedEventManager = new();
+
+    private IUsbInterface mUsbInterface;
+    private IUsbEndpoint mReadEndpoint;
+    private IUsbEndpoint mWriteEndpoint;
+    
+    private IUsbRequest mUsbRequestIn;
 
     private Thread mReadThread;
 
-    public AntDongleTransmitter(ISerial device)
+    public AntDongleTransmitter(IUsbDevice device)
     {
         mDevice = device;
 
-        if (device.IsConnected)
+        /*if (device.IsConnected)
             Start();
         else
             device.Opened += OnOpen;
 
-        device.Closed += OnClose;
+        device.Closed += OnClose;*/
     }
 
     /// <inheritdoc />
-    public bool IsConnected => mDevice.IsConnected;
+    public bool IsConnected => throw new NotImplementedException();
 
     /// <inheritdoc />
     public string AntVersion { get; private set; }
@@ -44,6 +53,30 @@ public class AntDongleTransmitter : IAntTransmitter
     /// <inheritdoc />
     public IDictionary<byte, IAntChannel> ActiveChannels { get; } = new Dictionary<byte, IAntChannel>();
 
+    public async Task Open()
+    {
+        mUsbInterface = mDevice.Interfaces.First();
+        for (var i = 0; i < mUsbInterface.Endpoints.Count(); i++)
+        {
+            var endpoint = mUsbInterface.Endpoints.ElementAt(i);
+            if (endpoint is not { Type: UsbType.XFerBulk }) continue;
+
+            if (endpoint.Direction == UsbDirection.In)
+                mReadEndpoint = endpoint;
+            else
+                mWriteEndpoint = endpoint;
+        }
+
+        await mDevice.OpenAsync();
+        await mDevice.ClaimInterfaceAsync(mUsbInterface);
+        
+        mUsbRequestIn = await mDevice.CreateRequestAsync();
+        mUsbRequestIn.Initialize(mDevice, mReadEndpoint);
+        IsConnected = true;
+
+        mLogger.LogInformation("ANT+ Dongle connected successfully ({0})", mDevice.DeviceName);
+        mOpenEventManager.HandleEvent(this, EventArgs.Empty, nameof(Opened));
+    }
 
     /// <inheritdoc />
     public async Task SetNetworkKeyAsync(byte networkNumber, byte[] key)

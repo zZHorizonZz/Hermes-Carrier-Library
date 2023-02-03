@@ -39,7 +39,7 @@ public class UsbBroadcastReceiver : BroadcastReceiver
 
             case UsbManager.ActionUsbDeviceDetached:
             {
-                if (intent?.GetParcelableExtra(UsbManager.ExtraDevice) is DroidUsbDevice usbDevice)
+                if (intent?.GetParcelableExtra(UsbManager.ExtraDevice) is UsbDevice usbDevice)
                     mService?.OnDeviceDetached(usbDevice);
 
                 break;
@@ -47,7 +47,7 @@ public class UsbBroadcastReceiver : BroadcastReceiver
 
             case UsbManager.ActionUsbDeviceAttached:
             {
-                if (intent?.GetParcelableExtra(UsbManager.ExtraDevice) is DroidUsbDevice usbDevice)
+                if (intent?.GetParcelableExtra(UsbManager.ExtraDevice) is UsbDevice usbDevice)
                     mService?.OnDeviceAttached(usbDevice);
 
                 break;

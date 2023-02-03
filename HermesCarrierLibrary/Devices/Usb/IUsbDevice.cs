@@ -63,4 +63,8 @@ public interface IUsbDevice
     void RequestWait(int timeout);
 
     Task RequestWaitAsync(int timeout);
+
+    IUsbRequest CreateRequest();
+
+    Task<IUsbRequest> CreateRequestAsync();
 }

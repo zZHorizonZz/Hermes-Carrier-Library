@@ -216,6 +216,19 @@ public class DroidUsbDevice : IUsbDevice
         throw new NotImplementedException();
     }
 
+    /// <inheritdoc />
+    public IUsbRequest CreateRequest()
+    {
+        var request = new UsbRequest();
+        return new DroidUsbRequest(request);
+    }
+
+    /// <inheritdoc />
+    public Task<IUsbRequest> CreateRequestAsync()
+    {
+        return Task.Run(CreateRequest);
+    }
+
     private static IEnumerable<IUsbInterface> GetInterfaces(global::Android.Hardware.Usb.UsbDevice device)
     {
         var interfaces = new List<IUsbInterface>();
