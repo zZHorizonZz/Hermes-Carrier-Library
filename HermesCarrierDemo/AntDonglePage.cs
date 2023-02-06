@@ -48,6 +48,11 @@ public class AntDonglePage : ContentPage
                         nameof(mViewModel.DeviceType)),
                     new Entry { Placeholder = "Transmission type", TextColor = Colors.White }.Bind(Entry.TextProperty,
                         nameof(mViewModel.TransmissionType)),
+                    new HorizontalStackLayout()
+                    {
+                        new Label { Text = "Pairing", TextColor = Colors.White },
+                        new Switch().Bind(Switch.IsToggledProperty, nameof(mViewModel.Pairing))
+                    },
                     new Button
                     {
                         Text = "Connect", TextColor = Colors.White, BackgroundColor = Color.FromArgb("#00FF00"),

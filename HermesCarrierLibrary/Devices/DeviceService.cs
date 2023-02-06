@@ -4,7 +4,6 @@ using HermesCarrierLibrary.Devices.Ant.Interfaces;
 using HermesCarrierLibrary.Devices.Ant.Util;
 using HermesCarrierLibrary.Devices.Usb;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using DeviceType = HermesCarrierLibrary.Devices.Shared.DeviceType;
 #if ANDROID
 using HermesCarrierLibrary.Platforms.Android.Devices;
@@ -26,8 +25,8 @@ public class DeviceService
     {
 #if ANDROID
         UsbService = AndroidDeviceService.Current?.UsbService;
-        UsbService.DevicePermissionGranted += OnConnectSerial;
-        UsbService.DeviceDetached += OnDisconnectSerial;
+        UsbService.DeviceAttached += OnConnect;
+        UsbService.DeviceDetached += OnDisconnect;
 #endif
 
         if (UsbService is null)
@@ -69,7 +68,7 @@ public class DeviceService
         remove => mDeviceDetected.RemoveEventHandler(value);
     }
 
-    public void OnConnectSerial(object? sender, UsbActionEventArgs args)
+    public void OnConnect(object? sender, UsbActionEventArgs args)
     {
         var deviceType = DeviceType.Usb;
         if (args.Device.IsAntDongle())
@@ -77,14 +76,17 @@ public class DeviceService
             deviceType = DeviceType.Ant;
             var transmitter = new AntDongleTransmitter(args.Device);
             AntService.ConnectTransmitter(transmitter);
+            Logger.LogInformation("Detected ANT device: {0}", args.Device);
         }
 
         mDeviceConnected.HandleEvent(this,
             new DeviceEventArgs(args.Device, DeviceEventArgs.DeviceAction.DeviceConnected, deviceType),
             nameof(DeviceConnected));
+
+        Logger.LogInformation("Connected to device: {0}", args.Device);
     }
 
-    public void OnDisconnectSerial(object? sender, UsbActionEventArgs args)
+    public void OnDisconnect(object? sender, UsbActionEventArgs args)
     {
         var deviceType = DeviceType.Usb;
 
@@ -98,5 +100,7 @@ public class DeviceService
         mDeviceDisconnected.HandleEvent(this,
             new DeviceEventArgs(args.Device, DeviceEventArgs.DeviceAction.DeviceDisconnected, deviceType),
             nameof(DeviceDisconnected));
+
+        Logger.LogInformation("Disconnected from device: {0}", args.Device);
     }
 }

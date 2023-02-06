@@ -1,6 +1,4 @@
-﻿using HermesCarrierLibrary.Devices.Shared;
-
-namespace HermesCarrierLibrary.Devices.Usb;
+﻿namespace HermesCarrierLibrary.Devices.Usb;
 
 public interface IUsbDevice
 {
@@ -30,7 +28,13 @@ public interface IUsbDevice
 
     bool HasPermission { get; }
 
-    bool RequestPermission();
+    void RequestPermission();
+
+    void RequestPermission(string packageName);
+
+    Task RequestPermissionAsync();
+
+    Task RequestPermissionAsync(string packageName);
 
     void Open();
 
@@ -55,14 +59,6 @@ public interface IUsbDevice
     void ReleaseInterface(IUsbInterface usbInterface);
 
     Task ReleaseInterfaceAsync(IUsbInterface usbInterface);
-
-    void RequestWait();
-
-    Task RequestWaitAsync();
-
-    void RequestWait(int timeout);
-
-    Task RequestWaitAsync(int timeout);
 
     IUsbRequest CreateRequest();
 

@@ -16,6 +16,8 @@ public partial class AntDongleViewModel : ObservableObject
 
     [ObservableProperty] private string _deviceType = "5";
 
+    [ObservableProperty] private bool _Pairing = false;
+
     [ObservableProperty] private string _status = "Disconnected";
 
     [ObservableProperty] private Color _statusColor = Color.FromArgb("#FF0000");
@@ -52,7 +54,8 @@ public partial class AntDongleViewModel : ObservableObject
         {
             DeviceNumber = ushort.Parse(DeviceNumber),
             DeviceType = byte.Parse(DeviceType),
-            TransmissionType = byte.Parse(TransmissionType)
+            TransmissionType = byte.Parse(TransmissionType),
+            IsPairing = Pairing
         };
 
         testDevice.ValueReceived += OnValueReceived;
@@ -79,11 +82,8 @@ public partial class AntDongleViewModel : ObservableObject
 
     private void OnDeviceConnected(object sender, DeviceEventArgs e)
     {
-        var transmitter = mDeviceService.AntService.Transmitters[e.Serial.VendorId ^ e.Serial.ProductId];
-        Status = transmitter.IsConnected ? "Connected" : "Disconnected";
-        StatusColor = transmitter.IsConnected ? Color.FromArgb("#00FF00") : Color.FromArgb("#FF0000");
-
-        if (transmitter.IsConnected) mTransmitter = transmitter;
+        var transmitter = mDeviceService.AntService.Transmitters[e.Serial.DeviceId ^ 31];
+        mTransmitter = transmitter;
     }
 
     private void OnDeviceDisconnected(object sender, DeviceEventArgs e)

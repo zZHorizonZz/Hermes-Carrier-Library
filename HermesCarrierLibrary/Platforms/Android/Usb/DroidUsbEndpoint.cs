@@ -1,13 +1,14 @@
-﻿using HermesCarrierLibrary.Devices.Usb;
+﻿using Android.Hardware.Usb;
+using HermesCarrierLibrary.Devices.Usb;
 using HermesCarrierLibrary.Devices.Usb.Enum;
 
 namespace HermesCarrierLibrary.Platforms.Android.Devices;
 
 public class DroidUsbEndpoint : IUsbEndpoint
 {
-    internal readonly global::Android.Hardware.Usb.UsbEndpoint Endpoint;
+    internal readonly UsbEndpoint Endpoint;
 
-    public DroidUsbEndpoint(global::Android.Hardware.Usb.UsbEndpoint usbEndpoint)
+    public DroidUsbEndpoint(UsbEndpoint usbEndpoint)
     {
         Endpoint = usbEndpoint;
     }

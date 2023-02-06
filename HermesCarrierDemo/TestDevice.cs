@@ -12,27 +12,15 @@ namespace HermesCarrierDemo;
 
 public class TestDevice
 {
-    public TestDevice()
-    {
-    }
-
-    public TestDevice(ushort deviceNumber, bool isSlave, byte deviceType, byte transmissionType)
-    {
-        DeviceNumber = deviceNumber;
-        IsSlave = isSlave;
-        DeviceType = deviceType;
-        TransmissionType = transmissionType;
-    }
-
     /// <summary>
     ///     Gets the unique device number assigned to the ANT transmitter.
     /// </summary>
     public ushort DeviceNumber { get; init; } = 0x7d0;
 
     /// <summary>
-    ///     Gets a value indicating whether the ANT transmitter is configured as a slave or a master device.
+    ///     Gets a value indicating whether the ANT transmitter is configured as a pairing device.
     /// </summary>
-    public bool IsSlave { get; init; }
+    public bool IsPairing { get; init; }
 
     /// <summary>
     ///     Gets the type of device the ANT transmitter is communicating with.
@@ -51,6 +39,9 @@ public class TestDevice
     {
         mTransmitter = transmitter;
 
+        if(!transmitter.IsConnected)
+            await transmitter.OpenAsync();
+        
         await transmitter.SendMessageAsync(new ResetSystemMessage());
         Thread.Sleep(500);
         await transmitter.SendMessageAsync(new SetNetworkKeyMessage(1,
@@ -59,7 +50,7 @@ public class TestDevice
         await channel.AssignChannel(transmitter);
 
         var result = (await channel.AwaitMessageOfTypeAsync<EventResponseMessage>(new ChannelIdMessage(DeviceNumber,
-            !IsSlave,
+            IsPairing,
             DeviceType,
             TransmissionType))).Type;
 

@@ -1,5 +1,6 @@
 ﻿using HermesCarrierLibrary.Devices.Ant.Channel;
 using HermesCarrierLibrary.Devices.Ant.Enum;
+using HermesCarrierLibrary.Devices.Ant.EventArgs;
 using HermesCarrierLibrary.Devices.Ant.Interfaces;
 using HermesCarrierLibrary.Devices.Ant.Messages.Client;
 using HermesCarrierLibrary.Devices.Ant.Messages.Device;
@@ -14,32 +15,40 @@ public class AntDongleTransmitter : IAntTransmitter
     private readonly IDictionary<IAntMessage, TaskCompletionSource<IAntMessage>>
         mAwaitingMessages = new Dictionary<IAntMessage, TaskCompletionSource<IAntMessage>>();
 
-    private readonly ILogger<AntDongleTransmitter> mLogger = new LoggerFactory().CreateLogger<AntDongleTransmitter>();
     private readonly IUsbDevice mDevice;
-    private readonly WeakEventManager mMessageReceivedEventManager = new();
 
-    private IUsbInterface mUsbInterface;
+    private readonly ILogger<AntDongleTransmitter> mLogger = new LoggerFactory().CreateLogger<AntDongleTransmitter>();
+
+    private readonly WeakEventManager mMessageReceivedEventManager = new();
+    private readonly WeakEventManager mTransmitterStatusChangedEventManager = new();
     private IUsbEndpoint mReadEndpoint;
-    private IUsbEndpoint mWriteEndpoint;
-    
-    private IUsbRequest mUsbRequestIn;
 
     private Thread mReadThread;
+
+    private IUsbInterface mUsbInterface;
+
+    private IUsbRequest mUsbRequestIn;
+    private IUsbEndpoint mWriteEndpoint;
 
     public AntDongleTransmitter(IUsbDevice device)
     {
         mDevice = device;
+    }
 
-        /*if (device.IsConnected)
-            Start();
-        else
-            device.Opened += OnOpen;
+    public event EventHandler<AntMessageReceivedEventArgs> MessageReceived
+    {
+        add => mMessageReceivedEventManager.AddEventHandler(value);
+        remove => mMessageReceivedEventManager.RemoveEventHandler(value);
+    }
 
-        device.Closed += OnClose;*/
+    public event EventHandler<AntTransmitterStatusChangedEventArgs> TransmitterStatusChanged
+    {
+        add => mTransmitterStatusChangedEventManager.AddEventHandler(value);
+        remove => mTransmitterStatusChangedEventManager.RemoveEventHandler(value);
     }
 
     /// <inheritdoc />
-    public bool IsConnected => throw new NotImplementedException();
+    public bool IsConnected { get; set; }
 
     /// <inheritdoc />
     public string AntVersion { get; private set; }
@@ -53,8 +62,16 @@ public class AntDongleTransmitter : IAntTransmitter
     /// <inheritdoc />
     public IDictionary<byte, IAntChannel> ActiveChannels { get; } = new Dictionary<byte, IAntChannel>();
 
-    public async Task Open()
+    /// <inheritdoc />
+    public async Task OpenAsync()
     {
+        Console.WriteLine("Opening ANT+ Dongle");
+        if (!mDevice.HasPermission)
+        {
+            await mDevice.RequestPermissionAsync();
+        }
+
+        Console.WriteLine("Opening device");
         mUsbInterface = mDevice.Interfaces.First();
         for (var i = 0; i < mUsbInterface.Endpoints.Count(); i++)
         {
@@ -67,15 +84,40 @@ public class AntDongleTransmitter : IAntTransmitter
                 mWriteEndpoint = endpoint;
         }
 
+        Console.WriteLine("Claiming interface");
         await mDevice.OpenAsync();
         await mDevice.ClaimInterfaceAsync(mUsbInterface);
-        
+
+        Console.WriteLine("Sending reset message");
         mUsbRequestIn = await mDevice.CreateRequestAsync();
         mUsbRequestIn.Initialize(mDevice, mReadEndpoint);
         IsConnected = true;
 
         mLogger.LogInformation("ANT+ Dongle connected successfully ({0})", mDevice.DeviceName);
-        mOpenEventManager.HandleEvent(this, EventArgs.Empty, nameof(Opened));
+        mTransmitterStatusChangedEventManager.HandleEvent(this,
+            new AntTransmitterStatusChangedEventArgs(this, Status.Connected),
+            nameof(OpenAsync));
+
+        Start();
+    }
+
+    /// <inheritdoc />
+    public Task CloseAsync()
+    {
+        IsConnected = false;
+
+        mUsbRequestIn?.Close();
+        mUsbRequestIn = null;
+
+        mDevice?.Close();
+        IsConnected = false;
+
+        mLogger.LogInformation("ANT+ Dongle disconnected successfully ({0})", mDevice.DeviceName);
+        mTransmitterStatusChangedEventManager.HandleEvent(this,
+            new AntTransmitterStatusChangedEventArgs(this, Status.Disconnected),
+            nameof(CloseAsync));
+
+        return Task.CompletedTask;
     }
 
     /// <inheritdoc />
@@ -116,7 +158,9 @@ public class AntDongleTransmitter : IAntTransmitter
     /// <inheritdoc />
     public async Task SendMessageAsync(IAntMessage message)
     {
-        await Task.Run(() => { mDevice.Write(message.Encode()); });
+        var data = message.Encode();
+        var transfer = new UsbBulkTransfer(mWriteEndpoint, data, data.Length, 1000);
+        await mDevice.BulkTransferAsync(transfer);
     }
 
     /// <inheritdoc />
@@ -152,21 +196,6 @@ public class AntDongleTransmitter : IAntTransmitter
         return Task.FromResult(message);
     }
 
-    public event EventHandler<AntMessageReceivedEventArgs> MessageReceived
-    {
-        add => mMessageReceivedEventManager.AddEventHandler(value);
-        remove => mMessageReceivedEventManager.RemoveEventHandler(value);
-    }
-
-    public void OnOpen(object? sender, System.EventArgs e)
-    {
-        Start();
-    }
-
-    public void OnClose(object? sender, System.EventArgs e)
-    {
-    }
-
     private IAntMessage DecodeMessage(byte[] data)
     {
         Console.WriteLine("Received: " + BitConverter.ToString(data).Replace("-", " "));
@@ -192,9 +221,9 @@ public class AntDongleTransmitter : IAntTransmitter
 
     private async Task StartReadThread()
     {
-        while (mDevice.IsConnected)
+        while (IsConnected)
         {
-            var data = mDevice.Read();
+            var data = await Read();
             if (data == null || data.Length == 0) break;
 
             var message = await ReceiveMessageAsync(data);
@@ -208,10 +237,7 @@ public class AntDongleTransmitter : IAntTransmitter
                     if (value != null)
                     {
                         mAwaitingMessages.Remove(key);
-                        if (!value.TrySetResult(message))
-                        {
-                            Console.WriteLine("Failed to set result");
-                        }
+                        if (!value.TrySetResult(message)) Console.WriteLine("Failed to set result");
                     }
 
                     break;
@@ -231,15 +257,22 @@ public class AntDongleTransmitter : IAntTransmitter
                 nameof(MessageReceived));
         }
 
-        foreach (var channel in ActiveChannels.Values)
-        {
-            await CloseChannelAsync(channel);
-        }
+        foreach (var channel in ActiveChannels.Values) await CloseChannelAsync(channel);
+    }
+
+    private async Task<byte[]> Read()
+    {
+        if (!IsConnected) throw new Exception("Device not connected");
+
+        var buffer = new byte[mReadEndpoint.MaxPacketSize];
+        if (!mUsbRequestIn.Queue(buffer, buffer.Length)) throw new IOException("Queueing USB request failed");
+
+        return await mUsbRequestIn.RequestWaitAsync(mDevice);
     }
 
     /// <inheritdoc />
     public override int GetHashCode()
     {
-        return mDevice.VendorId ^ mDevice.ProductId;
+        return mDevice.GetHashCode() ^ 31;
     }
 }

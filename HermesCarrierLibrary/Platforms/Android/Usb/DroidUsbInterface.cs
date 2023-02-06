@@ -1,12 +1,13 @@
-﻿using HermesCarrierLibrary.Devices.Usb;
+﻿using Android.Hardware.Usb;
+using HermesCarrierLibrary.Devices.Usb;
 
 namespace HermesCarrierLibrary.Platforms.Android.Devices;
 
 public class DroidUsbInterface : IUsbInterface
 {
-    internal readonly global::Android.Hardware.Usb.UsbInterface Interface;
+    internal readonly UsbInterface Interface;
 
-    public DroidUsbInterface(global::Android.Hardware.Usb.UsbInterface usbInterface)
+    public DroidUsbInterface(UsbInterface usbInterface)
     {
         Interface = usbInterface;
         Endpoints = GetEndpoints(usbInterface);
@@ -30,7 +31,7 @@ public class DroidUsbInterface : IUsbInterface
     /// <inheritdoc />
     public string Name => Interface.Name;
 
-    private static IEnumerable<IUsbEndpoint> GetEndpoints(global::Android.Hardware.Usb.UsbInterface usbInterface)
+    private static IEnumerable<IUsbEndpoint> GetEndpoints(UsbInterface usbInterface)
     {
         var endpoints = new List<IUsbEndpoint>();
         for (var i = 0; i < usbInterface.EndpointCount; i++)

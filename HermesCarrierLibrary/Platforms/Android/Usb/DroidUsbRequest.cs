@@ -1,4 +1,5 @@
-﻿using HermesCarrierLibrary.Devices.Usb;
+﻿using Android.Hardware.Usb;
+using HermesCarrierLibrary.Devices.Usb;
 using HermesCarrierLibrary.Platforms.Android.Devices.Util;
 using Java.Nio;
 
@@ -6,11 +7,11 @@ namespace HermesCarrierLibrary.Platforms.Android.Devices;
 
 public class DroidUsbRequest : IUsbRequest
 {
-    internal readonly global::Android.Hardware.Usb.UsbRequest Request;
+    internal readonly UsbRequest Request;
 
     private ByteBuffer mBuffer;
 
-    public DroidUsbRequest(global::Android.Hardware.Usb.UsbRequest usbRequest)
+    public DroidUsbRequest(UsbRequest usbRequest)
     {
         Request = usbRequest;
     }
@@ -67,5 +68,41 @@ public class DroidUsbRequest : IUsbRequest
     {
         mBuffer = ByteBuffer.Wrap(buffer);
         return Request.Queue(mBuffer, length);
+    }
+
+    /// <inheritdoc />
+    public byte[] RequestWait(IUsbDevice device)
+    {
+        if (device is DroidUsbDevice usbDevice)
+            usbDevice.DeviceConnection.RequestWait();
+
+        return Buffer;
+    }
+
+    /// <inheritdoc />
+    public async Task<byte[]> RequestWaitAsync(IUsbDevice device)
+    {
+        if (device is DroidUsbDevice usbDevice)
+            await usbDevice.DeviceConnection.RequestWaitAsync();
+
+        return Buffer;
+    }
+
+    /// <inheritdoc />
+    public byte[] RequestWait(IUsbDevice device, int timeout)
+    {
+        if (device is DroidUsbDevice usbDevice)
+            usbDevice.DeviceConnection.RequestWait(timeout);
+
+        return Buffer;
+    }
+
+    /// <inheritdoc />
+    public async Task<byte[]> RequestWaitAsync(IUsbDevice device, int timeout)
+    {
+        if (device is DroidUsbDevice usbDevice)
+            await usbDevice.DeviceConnection.RequestWaitAsync(timeout);
+
+        return Buffer;
     }
 }

@@ -1,6 +1,4 @@
-﻿using HermesCarrierLibrary.Devices.Shared;
-
-namespace HermesCarrierLibrary.Devices.Usb;
+﻿namespace HermesCarrierLibrary.Devices.Usb;
 
 public class UsbActionEventArgs : EventArgs
 {

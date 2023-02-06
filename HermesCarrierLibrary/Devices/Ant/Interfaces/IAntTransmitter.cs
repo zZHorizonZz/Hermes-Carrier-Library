@@ -1,5 +1,6 @@
 ﻿using HermesCarrierLibrary.Devices.Ant.Channel;
 using HermesCarrierLibrary.Devices.Ant.Enum;
+using HermesCarrierLibrary.Devices.Ant.EventArgs;
 using HermesCarrierLibrary.Devices.Ant.Messages;
 
 namespace HermesCarrierLibrary.Devices.Ant.Interfaces;
@@ -26,6 +27,13 @@ public interface IAntTransmitter : IAntMessenger
     ///     Gets the Dictionary of currently active channels for the ANT transmitter.
     /// </summary>
     IDictionary<byte, IAntChannel> ActiveChannels { get; }
+
+    event EventHandler<AntMessageReceivedEventArgs> MessageReceived;
+    event EventHandler<AntTransmitterStatusChangedEventArgs> TransmitterStatusChanged;
+
+    Task OpenAsync();
+
+    Task CloseAsync();
 
     /// <summary>
     ///     Set network key for the ANT transmitter.

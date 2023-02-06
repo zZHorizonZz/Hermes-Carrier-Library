@@ -13,4 +13,12 @@ public interface IUsbRequest
     bool Queue(byte[] buffer);
 
     bool Queue(byte[] buffer, int length);
+
+    byte[] RequestWait(IUsbDevice device);
+
+    Task<byte[]> RequestWaitAsync(IUsbDevice device);
+
+    byte[] RequestWait(IUsbDevice device, int timeout);
+
+    Task<byte[]> RequestWaitAsync(IUsbDevice device, int timeout);
 }

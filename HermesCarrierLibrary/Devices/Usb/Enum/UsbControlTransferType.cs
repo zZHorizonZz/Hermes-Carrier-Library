@@ -10,5 +10,5 @@ public enum UsbControlTransferType
     XferControl = 0x00,
     XferInterrupt = 0x03,
     XferIsoc = 0x01,
-    XferMask = 0x03,
+    XferMask = 0x03
 }

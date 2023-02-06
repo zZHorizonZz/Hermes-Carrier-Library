@@ -1,4 +1,4 @@
-﻿using HermesCarrierLibrary.Devices.Shared;
+﻿using HermesCarrierLibrary.Devices.Usb;
 using DeviceType = HermesCarrierLibrary.Devices.Shared.DeviceType;
 
 namespace HermesCarrierLibrary.Devices;
@@ -14,14 +14,14 @@ public class DeviceEventArgs : EventArgs
         DeviceDetected = 4
     }
 
-    public DeviceEventArgs(ISerial serial, DeviceAction action, DeviceType deviceType)
+    public DeviceEventArgs(IUsbDevice serial, DeviceAction action, DeviceType deviceType)
     {
         Serial = serial;
         Action = action;
         DeviceType = deviceType;
     }
 
-    public ISerial Serial { get; }
+    public IUsbDevice Serial { get; }
 
     public DeviceAction Action { get; }
 

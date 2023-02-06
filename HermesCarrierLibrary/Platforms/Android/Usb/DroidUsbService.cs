@@ -82,6 +82,8 @@ public class DroidUsbService : IUsbService
     public void OnDevicePermissionGranted(UsbDevice device)
     {
         var serial = mDevices[device.DeviceId];
+        if (serial is DroidUsbDevice droidUsbDevice)
+            droidUsbDevice.PermissionResult(true);
 
         mDevicePermissionGranted.HandleEvent(this,
             new UsbActionEventArgs(UsbActionEventArgs.UsbAction.DevicePermissionGranted, serial),
@@ -91,6 +93,8 @@ public class DroidUsbService : IUsbService
     public void OnDevicePermissionDenied(UsbDevice device)
     {
         var serial = mDevices[device.DeviceId];
+        if (serial is DroidUsbDevice droidUsbDevice)
+            droidUsbDevice.PermissionResult(false);
 
         mDevicePermissionDenied.HandleEvent(this,
             new UsbActionEventArgs(UsbActionEventArgs.UsbAction.DevicePermissionDenied, serial),

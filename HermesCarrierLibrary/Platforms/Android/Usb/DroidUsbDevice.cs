@@ -10,15 +10,17 @@ public class DroidUsbDevice : IUsbDevice
 {
     public const string ActionUsbPermission = "com.hermes.carrier.USB_PERMISSION";
 
-    internal readonly global::Android.Hardware.Usb.UsbDevice Device;
+    internal readonly UsbDevice Device;
 
     private readonly Context mContext;
 
     private readonly ILogger<DroidUsbDevice> mLogger = new LoggerFactory().CreateLogger<DroidUsbDevice>();
     private readonly UsbManager mUsbManager;
+    private readonly TaskCompletionSource<bool> mPermissionAwaiter = new();
+
     internal UsbDeviceConnection DeviceConnection;
 
-    public DroidUsbDevice(global::Android.Hardware.Usb.UsbDevice device, Context context,
+    public DroidUsbDevice(UsbDevice device, Context context,
         UsbManager usbManager)
     {
         Device = device;
@@ -66,10 +68,63 @@ public class DroidUsbDevice : IUsbDevice
     /// <inheritdoc />
     public bool HasPermission => CheckPermission();
 
-    /// <inheritdoc />
-    public bool RequestPermission()
+    internal void PermissionResult(bool result)
     {
-        return RequestPermission(ActionUsbPermission);
+        mPermissionAwaiter.SetResult(result);
+    }
+
+    /// <inheritdoc />
+    public void RequestPermission()
+    {
+        RequestPermission(ActionUsbPermission);
+    }
+
+    /// <inheritdoc />
+    public void RequestPermission(string packageName)
+    {
+        try
+        {
+            var pendingIntent = PendingIntent.GetBroadcast(mContext,
+                0,
+                new Intent(packageName),
+                PendingIntentFlags.Mutable);
+            mUsbManager.RequestPermission(Device, pendingIntent);
+
+            mLogger.LogInformation("Requesting permission for device {0}", Device.DeviceName);
+        }
+        catch (Exception e)
+        {
+            mLogger.LogError(e, "Error requesting permission for device {0}", Device.DeviceName);
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task RequestPermissionAsync()
+    {
+        await RequestPermissionAsync(ActionUsbPermission);
+    }
+
+    /// <inheritdoc />
+    public async Task RequestPermissionAsync(string packageName)
+    {
+        try
+        {
+            var pendingIntent = PendingIntent.GetBroadcast(mContext,
+                0,
+                new Intent(packageName),
+                PendingIntentFlags.Mutable);
+
+            mUsbManager.RequestPermission(Device, pendingIntent);
+            mLogger.LogInformation("Requesting permission for device {0}", Device.DeviceName);
+
+            await mPermissionAwaiter.Task;
+
+            mLogger.LogInformation("Permission granted for device {0}", Device.DeviceName);
+        }
+        catch (Exception e)
+        {
+            mLogger.LogError(e, "Error requesting permission for device {0}", Device.DeviceName);
+        }
     }
 
     /// <inheritdoc />
@@ -193,30 +248,6 @@ public class DroidUsbDevice : IUsbDevice
     }
 
     /// <inheritdoc />
-    public void RequestWait()
-    {
-        DeviceConnection.RequestWait().
-    }
-
-    /// <inheritdoc />
-    public Task RequestWaitAsync()
-    {
-        throw new NotImplementedException();
-    }
-
-    /// <inheritdoc />
-    public void RequestWait(int timeout)
-    {
-        throw new NotImplementedException();
-    }
-
-    /// <inheritdoc />
-    public Task RequestWaitAsync(int timeout)
-    {
-        throw new NotImplementedException();
-    }
-
-    /// <inheritdoc />
     public IUsbRequest CreateRequest()
     {
         var request = new UsbRequest();
@@ -229,7 +260,7 @@ public class DroidUsbDevice : IUsbDevice
         return Task.Run(CreateRequest);
     }
 
-    private static IEnumerable<IUsbInterface> GetInterfaces(global::Android.Hardware.Usb.UsbDevice device)
+    private static IEnumerable<IUsbInterface> GetInterfaces(UsbDevice device)
     {
         var interfaces = new List<IUsbInterface>();
         for (var i = 0; i < device.InterfaceCount; i++) interfaces.Add(new DroidUsbInterface(device.GetInterface(i)));
@@ -242,26 +273,6 @@ public class DroidUsbDevice : IUsbDevice
         return mUsbManager.HasPermission(Device);
     }
 
-    public bool RequestPermission(string packageName)
-    {
-        try
-        {
-            var pendingIntent = PendingIntent.GetBroadcast(mContext,
-                0,
-                new Intent(ActionUsbPermission),
-                PendingIntentFlags.Mutable);
-            mUsbManager.RequestPermission(Device, pendingIntent);
-
-            mLogger.LogInformation("Requesting permission for device {0}", Device.DeviceName);
-            return true;
-        }
-        catch (Exception e)
-        {
-            mLogger.LogError(e, "Error requesting permission for device {0}", Device.DeviceName);
-            return false;
-        }
-    }
-
     public override bool Equals(object? obj)
     {
         if (obj is DroidUsbDevice usbDevice) return usbDevice.DeviceId == DeviceId;
@@ -272,5 +283,11 @@ public class DroidUsbDevice : IUsbDevice
     public override string ToString()
     {
         return $"Device: {DeviceName} - {ManufacturerName} {ProductName} {SerialNumber} - {VendorId}:{ProductId}";
+    }
+
+    /// <inheritdoc />
+    public override int GetHashCode()
+    {
+        return DeviceId;
     }
 }
