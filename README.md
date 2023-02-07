@@ -1,4 +1,4 @@
-# Hermes Library
+# Hermes Carrier Library
 
 > Hermes Library is a set of APIs that allow developers to access and interact with ant, usb and bluetooth devices
 > within
