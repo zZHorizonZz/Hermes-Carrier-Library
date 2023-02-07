@@ -5,9 +5,8 @@ name: Publish
 
 on:
   push:
-    branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
+    tags:
+    - 'v*'
     
 env:
   PROJECT_PATH: 'HermesCarrierLibrary/HermesCarrierLibrary.csproj'
