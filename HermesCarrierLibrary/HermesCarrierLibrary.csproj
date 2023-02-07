@@ -15,6 +15,13 @@
         <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
         <TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
         <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
+        <Title>Hermes Carrier Library</Title>
+        <Description>Hermes Library is a set of APIs that allow developers to access and interact with ant, usb and bluetooth devices within their applications. The library provides an easy-to-use interface for managing communication between devices and the application.</Description>
+        <PackageProjectUrl>https://github.com/zZHorizonZz/Hermes-Carrier-Library</PackageProjectUrl>
+        <PackageLicenseUrl>https://github.com/zZHorizonZz/Hermes-Carrier-Library/blob/master/LICENSE</PackageLicenseUrl>
+        <RepositoryUrl>https://github.com/zZHorizonZz/Hermes-Carrier-Library</RepositoryUrl>
+        <PackageTags>MAUI, Android, Ant, USB</PackageTags>
+        <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     </PropertyGroup>
 
 </Project>
