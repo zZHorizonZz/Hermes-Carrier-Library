@@ -65,13 +65,8 @@ public class AntDongleTransmitter : IAntTransmitter
     /// <inheritdoc />
     public async Task OpenAsync()
     {
-        Console.WriteLine("Opening ANT+ Dongle");
-        if (!mDevice.HasPermission)
-        {
-            await mDevice.RequestPermissionAsync();
-        }
+        if (!mDevice.HasPermission) await mDevice.RequestPermissionAsync();
 
-        Console.WriteLine("Opening device");
         mUsbInterface = mDevice.Interfaces.First();
         for (var i = 0; i < mUsbInterface.Endpoints.Count(); i++)
         {
@@ -84,11 +79,9 @@ public class AntDongleTransmitter : IAntTransmitter
                 mWriteEndpoint = endpoint;
         }
 
-        Console.WriteLine("Claiming interface");
         await mDevice.OpenAsync();
         await mDevice.ClaimInterfaceAsync(mUsbInterface);
 
-        Console.WriteLine("Sending reset message");
         mUsbRequestIn = await mDevice.CreateRequestAsync();
         mUsbRequestIn.Initialize(mDevice, mReadEndpoint);
         IsConnected = true;

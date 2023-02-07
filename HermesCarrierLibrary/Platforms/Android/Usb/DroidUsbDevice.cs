@@ -15,8 +15,8 @@ public class DroidUsbDevice : IUsbDevice
     private readonly Context mContext;
 
     private readonly ILogger<DroidUsbDevice> mLogger = new LoggerFactory().CreateLogger<DroidUsbDevice>();
-    private readonly UsbManager mUsbManager;
     private readonly TaskCompletionSource<bool> mPermissionAwaiter = new();
+    private readonly UsbManager mUsbManager;
 
     internal UsbDeviceConnection DeviceConnection;
 
@@ -67,11 +67,6 @@ public class DroidUsbDevice : IUsbDevice
 
     /// <inheritdoc />
     public bool HasPermission => CheckPermission();
-
-    internal void PermissionResult(bool result)
-    {
-        mPermissionAwaiter.SetResult(result);
-    }
 
     /// <inheritdoc />
     public void RequestPermission()
@@ -258,6 +253,11 @@ public class DroidUsbDevice : IUsbDevice
     public Task<IUsbRequest> CreateRequestAsync()
     {
         return Task.Run(CreateRequest);
+    }
+
+    internal void PermissionResult(bool result)
+    {
+        mPermissionAwaiter.SetResult(result);
     }
 
     private static IEnumerable<IUsbInterface> GetInterfaces(UsbDevice device)

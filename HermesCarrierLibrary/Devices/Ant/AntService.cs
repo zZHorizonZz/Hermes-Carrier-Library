@@ -99,7 +99,7 @@ public class AntService : IAntService
     /// <inheritdoc />
     public IAntTransmitter[] DetectTransmitters()
     {
-        return (from device in mUsbService.GetDevices()
+        return (from device in mUsbService.Devices
             where device.IsAntDongle()
             select new AntDongleTransmitter(device)).Cast<IAntTransmitter>().ToArray();
     }

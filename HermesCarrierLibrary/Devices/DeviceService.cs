@@ -23,20 +23,34 @@ public class DeviceService
 
     public DeviceService()
     {
+        Logger.LogInformation("Starting {0}...", nameof(DeviceService));
 #if ANDROID
+        Logger.LogInformation("Detected Android platform. Initializing {0}...", nameof(AndroidDeviceService));
         UsbService = AndroidDeviceService.Current?.UsbService;
         UsbService.DeviceAttached += OnConnect;
         UsbService.DeviceDetached += OnDisconnect;
-#endif
 
         if (UsbService is null)
             throw new NullReferenceException("UsbService is null");
 
         AntService = new AntService(UsbService);
+
+        Logger.LogInformation("{0} initialized.", nameof(AndroidDeviceService));
+#elif IOS
+        Logger.LogInformation("Detected iOS platform. Initializing ...");
+        Logger.LogInformation("iOS Currently not supported.");
+#elif WINDOWS
+        Logger.LogInformation("Detected Windows platform. Initializing ...");
+        Logger.LogInformation("Windows Currently not supported.");
+#endif
     }
 
-    public IUsbService? UsbService { get; init; }
+    public IUsbService UsbService { get; init; }
     public IAntService AntService { get; init; }
+
+    public IEnumerable<IUsbDevice> UsbDevices => UsbService.Devices;
+
+    public IEnumerable<IAntTransmitter> AntTransmitters => AntService.Transmitters.Values;
 
     public event EventHandler<DeviceEventArgs> DeviceConnected
     {
@@ -68,7 +82,7 @@ public class DeviceService
         remove => mDeviceDetected.RemoveEventHandler(value);
     }
 
-    public void OnConnect(object? sender, UsbActionEventArgs args)
+    private void OnConnect(object? sender, UsbActionEventArgs args)
     {
         var deviceType = DeviceType.Usb;
         if (args.Device.IsAntDongle())
@@ -86,7 +100,7 @@ public class DeviceService
         Logger.LogInformation("Connected to device: {0}", args.Device);
     }
 
-    public void OnDisconnect(object? sender, UsbActionEventArgs args)
+    private void OnDisconnect(object? sender, UsbActionEventArgs args)
     {
         var deviceType = DeviceType.Usb;
 

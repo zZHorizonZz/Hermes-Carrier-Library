@@ -48,21 +48,24 @@ public class DroidUsbService : IUsbService
     }
 
     /// <inheritdoc />
-    public IEnumerable<IUsbDevice> GetDevices()
+    public IEnumerable<IUsbDevice> Devices
     {
-        var knownDevices = mDevices.Values;
-        var usbDevices = mUsbManager.DeviceList.Values;
-
-        foreach (var usbDevice in usbDevices)
+        get
         {
-            if (knownDevices.Any(d => d.DeviceId == usbDevice.DeviceId))
-                continue;
+            var knownDevices = mDevices.Values;
+            var usbDevices = mUsbManager.DeviceList.Values;
 
-            var device = new DroidUsbDevice(usbDevice, mContext, mUsbManager);
-            mDevices.Add(usbDevice.DeviceId, device);
+            foreach (var usbDevice in usbDevices)
+            {
+                if (knownDevices.Any(d => d.DeviceId == usbDevice.DeviceId))
+                    continue;
+
+                var device = new DroidUsbDevice(usbDevice, mContext, mUsbManager);
+                mDevices.Add(usbDevice.DeviceId, device);
+            }
+
+            return mDevices.Values;
         }
-
-        return mDevices.Values;
     }
 
     public void Register()

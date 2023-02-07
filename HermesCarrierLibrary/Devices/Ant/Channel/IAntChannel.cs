@@ -39,10 +39,20 @@ public interface IAntChannel : IAntMessenger
     /// </summary>
     byte Frequency { get; }
 
+    /// <summary>
+    ///     The event that is raised when a message is received.
+    /// </summary>
     event EventHandler<AntMessageReceivedEventArgs> MessageReceived;
 
+    /// <summary>
+    ///     Will assign this channel to the transmitter.
+    /// </summary>
+    /// <param name="transmitter">The transmitter to assign the channel to.</param>
     Task AssignChannel(IAntTransmitter transmitter);
 
+    /// <summary>
+    ///     WIll open the ANT channel.
+    /// </summary>
     Task Open();
 
     /// <summary>
@@ -51,5 +61,9 @@ public interface IAntChannel : IAntMessenger
     /// <returns>A task that represents the asynchronous operation.</returns>
     Task Close();
 
+    /// <summary>
+    ///     This is used by the <see cref="HermesCarrierLibrary.Devices.Ant.Dongle.AntDongleTransmitter" /> and in the future
+    ///     will be removed.
+    /// </summary>
     void OnMessageReceived(object? sender, AntMessageReceivedEventArgs e);
 }
