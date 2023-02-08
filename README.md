@@ -1,3 +1,8 @@
+<p align="center">
+	<a href="https://www.nuget.org/packages/HermesCarrierLibrary/"><img src="https://img.shields.io/nuget/v/HermesCarrierLibrary?style=for-the-badge" alt="NuGet"></a>
+  <a href="https://www.nuget.org/packages/HermesCarrierLibrary/"><img src="https://img.shields.io/nuget/dt/HermesCarrierLibrary?style=for-the-badge" alt="NuGet Downloads"></a>
+</p>
+
 # Hermes Carrier Library
 
 > Hermes Library is a set of APIs that allow developers to access and interact with ant, usb and bluetooth devices
@@ -28,7 +33,7 @@
 > Console:
 
 ```bash
-Install-Package Hermes-Carrier-Library
+Install-Package HermesCarrierLibrary
 ```
 
 ## Usage
