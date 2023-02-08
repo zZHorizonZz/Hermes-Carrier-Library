@@ -264,8 +264,22 @@ public class AntDongleTransmitter : IAntTransmitter
     }
 
     /// <inheritdoc />
+    public override bool Equals(object obj)
+    {
+        return obj is AntDongleTransmitter transmitter && transmitter.mDevice.Equals(mDevice);
+    }
+
+    /// <inheritdoc />
     public override int GetHashCode()
     {
         return mDevice.GetHashCode() ^ 31;
+    }
+
+    /// <inheritdoc />
+    public override string ToString()
+    {
+        return $"{{\"{nameof(SerialNumber)}\":\"{SerialNumber}\"," +
+               $"\"{nameof(AntVersion)}\":\"{AntVersion}\"," +
+               $"\"{nameof(Capabilities)}\":\"{Capabilities}\"}}";
     }
 }

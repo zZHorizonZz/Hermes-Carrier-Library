@@ -273,6 +273,7 @@ public class DroidUsbDevice : IUsbDevice
         return mUsbManager.HasPermission(Device);
     }
 
+    /// <inheritdoc />
     public override bool Equals(object? obj)
     {
         if (obj is DroidUsbDevice usbDevice) return usbDevice.DeviceId == DeviceId;
@@ -280,9 +281,13 @@ public class DroidUsbDevice : IUsbDevice
         return false;
     }
 
+    /// <inheritdoc />
     public override string ToString()
     {
-        return $"Device: {DeviceName} - {ManufacturerName} {ProductName} {SerialNumber} - {VendorId}:{ProductId}";
+        return $"{{\"DeviceId\":{DeviceId}," +
+               $"\"DeviceName\":\"{Device.DeviceName}\"," +
+               $"\"VendorId\":{Device.VendorId}," +
+               $"\"ProductId\":{Device.ProductId}}}";
     }
 
     /// <inheritdoc />
