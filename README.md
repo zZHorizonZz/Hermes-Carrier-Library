@@ -67,13 +67,18 @@ var devices = deviceService.UsbDevices.FirstOrDefault();
 var interfaces = device.Interfaces.First();
 
 // We can also get the endpoints from the interface
-var endpoints = interfaces.Endpoints.First();
+var endpoint = interfaces.Endpoints.First();
 
 // We can now open the USB device
 await device.OpenAsync();
 
 // If everything went well, we can now start using the USB device
 await device.ClaimInterfaceAsync(interface); // Claim the interface
+
+// Now we can send the message
+var bytes = new byte[0];
+var transfer = new UsbBulkTransfer(endpoint, bytes, bytes.Length, 1000);
+var result = await device.BulkTransfer(transfer);
 ```
 
 ## Bluetooth
