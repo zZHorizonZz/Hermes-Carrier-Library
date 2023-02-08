@@ -2,11 +2,13 @@
 using HermesCarrierLibrary.Devices.Ant.Interfaces;
 using HermesCarrierLibrary.Devices.Ant.Messages.Client;
 using HermesCarrierLibrary.Devices.Ant.Messages.Device;
+using Microsoft.Extensions.Logging;
 
 namespace HermesCarrierLibrary.Devices.Ant.Channel;
 
 public class Channel : IAntChannel
 {
+    private readonly ILogger mLogger = new LoggerFactory().CreateLogger<Channel>();
     private readonly WeakEventManager mMessageReceivedEventManager = new();
 
     private IAntTransmitter? mTransmitter;
@@ -63,24 +65,23 @@ public class Channel : IAntChannel
 
         if (result != EventResponseType.RESPONSE_NO_ERROR)
         {
-            Console.WriteLine($"Failed to assign channel {result}");
+            mLogger.LogError("Failed to assign ANT channel {result}", result);
             return;
         }
 
-        Console.WriteLine("Channel assigned");
+        mLogger.LogInformation("ANT Channel assigned successfully");
     }
 
     public async Task Open()
     {
         var result = (await AwaitMessageOfTypeAsync<EventResponseMessage>(new OpenChannelMessage())).Type;
-        Console.WriteLine($"Result: {result}");
         if (result != EventResponseType.RESPONSE_NO_ERROR)
         {
-            Console.WriteLine($"Failed to open channel {result}");
+            mLogger.LogError("Failed to open ANT channel {result}", result);
             return;
         }
 
-        Console.WriteLine("Channel opened");
+        mLogger.LogInformation("ANT Channel opened successfully");
     }
 
     public async Task Close()
@@ -90,6 +91,7 @@ public class Channel : IAntChannel
 
         await AwaitMessageOfTypeAsync<EventResponseMessage>(new UnAssignChannelMessage());
         await AwaitMessageOfTypeAsync<EventResponseMessage>(new CloseChannelMessage());
+        mLogger.LogInformation("ANT Channel closed successfully");
     }
 
     /// <inheritdoc />

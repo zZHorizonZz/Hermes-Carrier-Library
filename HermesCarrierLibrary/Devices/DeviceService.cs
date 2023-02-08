@@ -13,8 +13,7 @@ namespace HermesCarrierLibrary.Devices;
 
 public class DeviceService
 {
-    public static readonly ILogger Logger = new LoggerFactory().CreateLogger<DeviceService>();
-
+    private readonly ILogger mLogger = new LoggerFactory().CreateLogger<DeviceService>();
     private readonly WeakEventManager mDeviceConnected = new();
     private readonly WeakEventManager mDeviceDetected = new();
     private readonly WeakEventManager mDeviceDisconnected = new();
@@ -23,9 +22,9 @@ public class DeviceService
 
     public DeviceService()
     {
-        Logger.LogInformation("Starting {0}...", nameof(DeviceService));
+        mLogger.LogInformation("Starting {0}...", nameof(DeviceService));
 #if ANDROID
-        Logger.LogInformation("Detected Android platform. Initializing {0}...", nameof(AndroidDeviceService));
+        mLogger.LogInformation("Detected Android platform. Initializing {0}...", nameof(AndroidDeviceService));
         UsbService = AndroidDeviceService.Current?.UsbService;
         UsbService.DeviceAttached += OnConnect;
         UsbService.DeviceDetached += OnDisconnect;
@@ -35,13 +34,13 @@ public class DeviceService
 
         AntService = new AntService(UsbService);
 
-        Logger.LogInformation("{0} initialized.", nameof(AndroidDeviceService));
+        mLogger.LogInformation("{0} initialized.", nameof(AndroidDeviceService));
 #elif IOS
-        Logger.LogInformation("Detected iOS platform. Initializing ...");
-        Logger.LogInformation("iOS Currently not supported.");
+        mLogger.LogInformation("Detected iOS platform. Initializing ...");
+        mLogger.LogInformation("iOS Currently not supported.");
 #elif WINDOWS
-        Logger.LogInformation("Detected Windows platform. Initializing ...");
-        Logger.LogInformation("Windows Currently not supported.");
+        mLogger.LogInformation("Detected Windows platform. Initializing ...");
+        mLogger.LogInformation("Windows Currently not supported.");
 #endif
     }
 
@@ -90,14 +89,14 @@ public class DeviceService
             deviceType = DeviceType.Ant;
             var transmitter = new AntDongleTransmitter(args.Device);
             AntService.ConnectTransmitter(transmitter);
-            Logger.LogInformation("Detected ANT device: {0}", args.Device);
+            mLogger.LogInformation("Detected ANT device: {0}", args.Device);
         }
 
         mDeviceConnected.HandleEvent(this,
             new DeviceEventArgs(args.Device, DeviceEventArgs.DeviceAction.DeviceConnected, deviceType),
             nameof(DeviceConnected));
 
-        Logger.LogInformation("Connected to device: {0}", args.Device);
+        mLogger.LogInformation("Connected to device: {0}", args.Device);
     }
 
     private void OnDisconnect(object? sender, UsbActionEventArgs args)
@@ -115,6 +114,6 @@ public class DeviceService
             new DeviceEventArgs(args.Device, DeviceEventArgs.DeviceAction.DeviceDisconnected, deviceType),
             nameof(DeviceDisconnected));
 
-        Logger.LogInformation("Disconnected from device: {0}", args.Device);
+        mLogger.LogInformation("Disconnected from device: {0}", args.Device);
     }
 }

@@ -191,7 +191,6 @@ public class AntDongleTransmitter : IAntTransmitter
 
     private IAntMessage DecodeMessage(byte[] data)
     {
-        Console.WriteLine("Received: " + BitConverter.ToString(data).Replace("-", " "));
         var messageId = data[2];
         var message = AntService.DeviceBoundMessages.FirstOrDefault(x => x.MessageId == messageId);
         return message ?? new UnknownMessage(data);
@@ -230,7 +229,8 @@ public class AntDongleTransmitter : IAntTransmitter
                     if (value != null)
                     {
                         mAwaitingMessages.Remove(key);
-                        if (!value.TrySetResult(message)) Console.WriteLine("Failed to set result");
+                        if (!value.TrySetResult(message))
+                            mLogger.LogWarning("Failed to set result for awaiting message");
                     }
 
                     break;
