@@ -48,7 +48,7 @@ public class AntDongleTransmitter : IAntTransmitter
     }
 
     /// <inheritdoc />
-    public bool IsConnected { get; set; }
+    public bool IsConnected { get; private set; }
 
     /// <inheritdoc />
     public string AntVersion { get; private set; }
@@ -86,12 +86,12 @@ public class AntDongleTransmitter : IAntTransmitter
         mUsbRequestIn.Initialize(mDevice, mReadEndpoint);
         IsConnected = true;
 
-        mLogger.LogInformation("ANT+ Dongle connected successfully ({0})", mDevice.DeviceName);
         mTransmitterStatusChangedEventManager.HandleEvent(this,
             new AntTransmitterStatusChangedEventArgs(this, Status.Connected),
             nameof(OpenAsync));
-
         Start();
+        
+        mLogger.LogInformation("ANT+ Dongle connected successfully ({0})", mDevice.DeviceName);
     }
 
     /// <inheritdoc />
@@ -105,11 +105,11 @@ public class AntDongleTransmitter : IAntTransmitter
         mDevice?.Close();
         IsConnected = false;
 
-        mLogger.LogInformation("ANT+ Dongle disconnected successfully ({0})", mDevice.DeviceName);
         mTransmitterStatusChangedEventManager.HandleEvent(this,
             new AntTransmitterStatusChangedEventArgs(this, Status.Disconnected),
             nameof(CloseAsync));
 
+        mLogger.LogInformation("ANT+ Dongle disconnected successfully ({0})", mDevice.DeviceName);
         return Task.CompletedTask;
     }
 
