@@ -137,6 +137,9 @@ public class Channel : IAntChannel
     /// <inheritdoc />
     public void OnMessageReceived(object sender, AntMessageReceivedEventArgs e)
     {
-        mMessageReceivedEventManager.HandleEvent(this, e, nameof(MessageReceived));
+        if (e.Message.ChannelNumber == Number)
+        {
+            mMessageReceivedEventManager.HandleEvent(this, e, nameof(MessageReceived));
+        }
     }
 }

@@ -14,7 +14,7 @@ public abstract class AntMessage : IAntMessage
     public byte MessageId { get; set; }
     public byte Length { get; set; }
 
-    public byte ChannelNumber { get; set; }
+    public byte ChannelNumber { get; set; } = byte.MaxValue;
 
     /// <inheritdoc />
     public abstract void DecodePayload(BinaryReader payload);
