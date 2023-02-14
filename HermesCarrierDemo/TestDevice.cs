@@ -39,14 +39,17 @@ public class TestDevice
     {
         mTransmitter = transmitter;
 
+        Console.WriteLine("Opening ANT transmitter...");
         if(!transmitter.IsConnected)
             await transmitter.OpenAsync();
         
+        Console.WriteLine("Resetting ANT transmitter...");
         await transmitter.SendMessageAsync(new ResetSystemMessage());
         Thread.Sleep(500);
         await transmitter.SendMessageAsync(new SetNetworkKeyMessage(1,
             new byte[] { 0xF9, 0xED, 0x22, 0xB8, 0xFD, 0x56, 0x67, 0xCD }));
 
+        Console.WriteLine("Configuring ANT channel...");
         await channel.AssignChannel(transmitter);
 
         var result = (await channel.AwaitMessageOfTypeAsync<EventResponseMessage>(new ChannelIdMessage(DeviceNumber,
@@ -54,6 +57,7 @@ public class TestDevice
             DeviceType,
             TransmissionType))).Type;
 
+        Console.WriteLine($"Channel id set to {result}");
         if (result != EventResponseType.RESPONSE_NO_ERROR)
         {
             Console.WriteLine($"Failed to set channel id {result}");
