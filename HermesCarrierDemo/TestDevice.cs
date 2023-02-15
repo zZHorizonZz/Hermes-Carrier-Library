@@ -33,16 +33,18 @@ public class TestDevice
     public byte TransmissionType { get; init; } = 0x01;
 
     public event EventHandler<ValueReceivedEventArgs> ValueReceived;
+
     private IAntTransmitter mTransmitter;
+    private Timer mHeartbeatTimer;
 
     public async Task Open(IAntTransmitter transmitter, IAntChannel channel)
     {
         mTransmitter = transmitter;
 
         Console.WriteLine("Opening ANT transmitter...");
-        if(!transmitter.IsConnected)
+        if (!transmitter.IsConnected)
             await transmitter.OpenAsync();
-        
+
         Console.WriteLine("Resetting ANT transmitter...");
         await transmitter.SendMessageAsync(new ResetSystemMessage());
         Thread.Sleep(500);
@@ -90,11 +92,17 @@ public class TestDevice
 
     public void StartHeartbeat(IAntChannel channel)
     {
-        var timer = new Timer(async _ => await Heartbeat(channel), null, 0, 5000);
+        mHeartbeatTimer = new Timer(async _ => await Heartbeat(channel), null, 0, 5000);
     }
 
     public async Task Heartbeat(IAntChannel channel)
     {
+        if (!mTransmitter.IsConnected)
+        {
+            await mHeartbeatTimer.DisposeAsync();
+            return;
+        }
+
         var response = await channel.AwaitMessageOfTypeAsync<EventResponseMessage>(new BroadcastDataMessage(new byte[]
             { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }));
 

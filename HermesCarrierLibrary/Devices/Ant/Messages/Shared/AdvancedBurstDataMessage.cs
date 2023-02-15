@@ -13,8 +13,9 @@ public class AdvancedBurstDataMessage : AntMessage
     /// <inheritdoc />
     public override void DecodePayload(BinaryReader payload)
     {
-        SequenceNumber = payload.ReadByte();
-        ChannelNumber = payload.ReadByte();
+        var flags = payload.ReadByte();
+        SequenceNumber = (byte)(flags >> 5);
+        ChannelNumber = (byte)(flags & 0x1F);
 
         Data = payload.ReadBytes(Length - 2);
     }
@@ -23,8 +24,12 @@ public class AdvancedBurstDataMessage : AntMessage
     public override BinaryWriter EncodePayload()
     {
         var payload = new BinaryWriter(new MemoryStream());
-        payload.Write(SequenceNumber);
-        payload.Write(ChannelNumber);
+        
+        var flags = (byte)0;
+        flags |= (byte)(SequenceNumber << 5);
+        flags |= ChannelNumber;
+        
+        payload.Write(flags);
         payload.Write(Data);
         return payload;
     }

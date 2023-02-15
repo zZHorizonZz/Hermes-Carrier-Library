@@ -65,10 +65,8 @@ public class AntDongleTransmitter : IAntTransmitter
     /// <inheritdoc />
     public async Task OpenAsync()
     {
-        Console.WriteLine("Opening ANT+ Dongle");
         if (!mDevice.HasPermission) await mDevice.RequestPermissionAsync();
 
-        Console.WriteLine("Opening ANT+ Dongle 2");
         mUsbInterface = mDevice.Interfaces.First();
         for (var i = 0; i < mUsbInterface.Endpoints.Count(); i++)
         {
@@ -81,7 +79,6 @@ public class AntDongleTransmitter : IAntTransmitter
                 mWriteEndpoint = endpoint;
         }
 
-        Console.WriteLine("Opening ANT+ Dongle 3 - {0}", mDevice.DeviceName);
         await mDevice.OpenAsync();
         await mDevice.ClaimInterfaceAsync(mUsbInterface);
 
@@ -94,7 +91,7 @@ public class AntDongleTransmitter : IAntTransmitter
             nameof(OpenAsync));
 
         Start();
-        
+
         mLogger.LogInformation("ANT+ Dongle connected successfully ({0})", mDevice.DeviceName);
     }
 
@@ -120,12 +117,21 @@ public class AntDongleTransmitter : IAntTransmitter
     /// <inheritdoc />
     public async Task SetNetworkKeyAsync(byte networkNumber, byte[] key)
     {
+        if (!IsConnected)
+            throw new Exception("Cannot set network key because the transmitter is not connected");
+
         await SendMessageAsync(new SetNetworkKeyMessage(networkNumber, key));
     }
 
     /// <inheritdoc />
     public async Task OpenChannelAsync(IAntChannel channel)
     {
+        if (!IsConnected)
+        {
+            mLogger.LogWarning("Cannot open channel {0} because the transmitter is not connected", channel.Number);
+            return;
+        }
+
         if (ActiveChannels.ContainsKey(channel.Number))
             throw new Exception("Channel is already bound to this transmitter");
 
@@ -138,6 +144,12 @@ public class AntDongleTransmitter : IAntTransmitter
     /// <inheritdoc />
     public async Task CloseChannelAsync(IAntChannel channel)
     {
+        if (!IsConnected)
+        {
+            mLogger.LogWarning("Cannot close channel {0} because the transmitter is not connected", channel.Number);
+            return;
+        }
+
         if (!IsChannelOpen(channel.Number))
             throw new Exception("Channel is not bound to this transmitter");
 
@@ -155,6 +167,9 @@ public class AntDongleTransmitter : IAntTransmitter
     /// <inheritdoc />
     public async Task SendMessageAsync(IAntMessage message)
     {
+        if (!IsConnected)
+            throw new Exception("Cannot send message because the transmitter is not connected");
+        
         var data = message.Encode();
         var transfer = new UsbBulkTransfer(mWriteEndpoint, data, data.Length, 1000);
         await mDevice.BulkTransferAsync(transfer);
@@ -163,6 +178,9 @@ public class AntDongleTransmitter : IAntTransmitter
     /// <inheritdoc />
     public async Task<IAntMessage> AwaitMessageAsync(IAntMessage message)
     {
+        if (!IsConnected)
+            throw new Exception("Cannot await message because the transmitter is not connected");
+        
         var tcs = new TaskCompletionSource<IAntMessage>();
         mAwaitingMessages.Add(message, tcs);
 
@@ -175,6 +193,9 @@ public class AntDongleTransmitter : IAntTransmitter
     /// <inheritdoc />
     public Task<T> AwaitMessageOfTypeAsync<T>(IAntMessage message) where T : IAntMessage
     {
+        if (!IsConnected)
+            throw new Exception("Cannot await message because the transmitter is not connected");
+        
         return Task.Run(() =>
         {
             var response = AwaitMessageAsync(message);
@@ -187,6 +208,9 @@ public class AntDongleTransmitter : IAntTransmitter
     /// <inheritdoc />
     public Task<IAntMessage> ReceiveMessageAsync(byte[] data)
     {
+        if (!IsConnected)
+            throw new Exception("Cannot receive message because the transmitter is not connected");
+        
         var message = DecodeMessage(data);
         if (message is not UnknownMessage) message.Decode(data);
 
@@ -262,9 +286,11 @@ public class AntDongleTransmitter : IAntTransmitter
         if (!IsConnected) throw new Exception("Device not connected");
 
         var buffer = new byte[mReadEndpoint.MaxPacketSize];
-        if (!mUsbRequestIn.Queue(buffer, buffer.Length)) throw new IOException("Queueing USB request failed");
+        if (mUsbRequestIn.Queue(buffer, buffer.Length)) return await mUsbRequestIn.RequestWaitAsync(mDevice);
 
-        return await mUsbRequestIn.RequestWaitAsync(mDevice);
+        mLogger.LogError("Failed to queue USB request");
+        await CloseAsync();
+        return null;
     }
 
     /// <inheritdoc />

@@ -5,6 +5,7 @@ using HermesCarrierLibrary.Devices.Ant.Messages.Device;
 using HermesCarrierLibrary.Devices.Ant.Messages.Shared;
 using HermesCarrierLibrary.Devices.Ant.Util;
 using HermesCarrierLibrary.Devices.Usb;
+using Microsoft.Extensions.Logging;
 using ChannelIdMessage = HermesCarrierLibrary.Devices.Ant.Messages.Client.ChannelIdMessage;
 
 namespace HermesCarrierLibrary.Devices.Ant;
@@ -86,11 +87,15 @@ public class AntService : IAntService
         new BurstTransferDataMessage()
     };
 
+    private readonly ILogger<AntService> mLogger = new LoggerFactory().CreateLogger<AntService>();
     private readonly IUsbService mUsbService;
 
     public AntService(IUsbService usbService)
     {
         mUsbService = usbService;
+        mLogger.LogInformation($"{nameof(AntService)} initialized successfully." +
+                               $" Registered {ClientBoundMessages.Length} client bound messages and" +
+                               $" {DeviceBoundMessages.Length} device bound messages.");
     }
 
     /// <inheritdoc />
@@ -108,11 +113,13 @@ public class AntService : IAntService
     public void ConnectTransmitter(IAntTransmitter transmitter)
     {
         Transmitters.Add(transmitter.GetHashCode(), transmitter);
+        mLogger.LogInformation($"Connected to transmitter {transmitter}");
     }
 
     /// <inheritdoc />
     public void DisconnectTransmitter(IAntTransmitter transmitter)
     {
         Transmitters.Remove(transmitter.GetHashCode());
+        mLogger.LogInformation($"Disconnected from transmitter {transmitter}");
     }
 }

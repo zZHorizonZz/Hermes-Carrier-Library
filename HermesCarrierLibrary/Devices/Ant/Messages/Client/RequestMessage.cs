@@ -27,7 +27,10 @@ public class RequestMessage : AntMessage
     public override BinaryWriter EncodePayload()
     {
         var payload = new BinaryWriter(new MemoryStream());
-        payload.Write(ChannelNumber);
+        var flags = (byte)0;
+        if(ChannelNumber != byte.MaxValue) flags = ChannelNumber;
+        
+        payload.Write(flags);
         payload.Write((byte)RequestType);
         return payload;
     }
