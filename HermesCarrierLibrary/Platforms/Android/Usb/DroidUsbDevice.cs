@@ -171,20 +171,7 @@ public class DroidUsbDevice : IUsbDevice
     /// <inheritdoc />
     public int ControlTransfer(UsbControlTransfer transfer)
     {
-        var type = transfer.RequestType;
-        UsbAddressing? droidAddressing = null;
-
-        foreach (var value in Enum.GetValues<UsbAddressing>())
-        {
-            if ((int)value != (int)type) continue;
-
-            droidAddressing = value;
-            break;
-        }
-
-        if (!droidAddressing.HasValue) throw new Exception("Invalid request type");
-
-        return DeviceConnection.ControlTransfer(droidAddressing.Value, transfer.Request, transfer.Value,
+        return DeviceConnection.ControlTransfer((UsbAddressing)transfer.RequestType, transfer.Request, transfer.Value,
             transfer.Index, transfer.Data, transfer.Length, transfer.Timeout);
     }
 
@@ -209,35 +196,35 @@ public class DroidUsbDevice : IUsbDevice
     }
 
     /// <inheritdoc />
-    public void ClaimInterface(IUsbInterface usbInterface)
+    public bool ClaimInterface(IUsbInterface usbInterface)
     {
         if (DeviceConnection is null) throw new Exception("Device is not open");
 
         if (usbInterface is not DroidUsbInterface droidInterface)
             throw new Exception("Interface is not a valid USB interface");
 
-        DeviceConnection.ClaimInterface(droidInterface.Interface, true);
+        return DeviceConnection.ClaimInterface(droidInterface.Interface, true);
     }
 
     /// <inheritdoc />
-    public Task ClaimInterfaceAsync(IUsbInterface usbInterface)
+    public Task<bool> ClaimInterfaceAsync(IUsbInterface usbInterface)
     {
         return Task.Run(() => ClaimInterface(usbInterface));
     }
 
     /// <inheritdoc />
-    public void ReleaseInterface(IUsbInterface usbInterface)
+    public bool ReleaseInterface(IUsbInterface usbInterface)
     {
         if (DeviceConnection is null) throw new Exception("Device is not open");
 
         if (usbInterface is not DroidUsbInterface droidInterface)
             throw new Exception("Interface is not a valid USB interface");
 
-        DeviceConnection.ReleaseInterface(droidInterface.Interface);
+        return DeviceConnection.ReleaseInterface(droidInterface.Interface);
     }
 
     /// <inheritdoc />
-    public Task ReleaseInterfaceAsync(IUsbInterface usbInterface)
+    public Task<bool> ReleaseInterfaceAsync(IUsbInterface usbInterface)
     {
         return Task.Run(() => ReleaseInterface(usbInterface));
     }

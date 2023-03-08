@@ -1,10 +1,8 @@
-﻿using HermesCarrierLibrary.Devices.Usb.Enum;
-
-namespace HermesCarrierLibrary.Devices.Usb;
+﻿namespace HermesCarrierLibrary.Devices.Usb;
 
 public class UsbControlTransfer
 {
-    public UsbControlTransfer(UsbControlTransferType requestType, int request, int value, int index, byte[] data,
+    public UsbControlTransfer(int requestType, int request, int value, int index, byte[] data,
         int? offset, int length, int timeout)
     {
         RequestType = requestType;
@@ -17,7 +15,7 @@ public class UsbControlTransfer
         Timeout = timeout;
     }
 
-    public UsbControlTransfer(UsbControlTransferType requestType, int request, int value, int index, byte[] data,
+    public UsbControlTransfer(int requestType, int request, int value, int index, byte[] data,
         int length, int timeout)
     {
         RequestType = requestType;
@@ -29,7 +27,7 @@ public class UsbControlTransfer
         Timeout = timeout;
     }
 
-    public UsbControlTransferType RequestType { get; set; }
+    public int RequestType { get; set; }
     public int Request { get; set; }
     public int Value { get; set; }
 

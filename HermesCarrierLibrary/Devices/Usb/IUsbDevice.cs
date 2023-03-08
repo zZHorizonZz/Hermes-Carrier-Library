@@ -142,27 +142,27 @@ public interface IUsbDevice
     ///     Claims the specified USB interface for communication.
     /// </summary>
     /// <param name="usbInterface">The USB interface to claim</param>
-    void ClaimInterface(IUsbInterface usbInterface);
+    bool ClaimInterface(IUsbInterface usbInterface);
 
     /// <summary>
     ///     Asynchronously claims the specified USB interface for communication.
     /// </summary>
     /// <param name="usbInterface">The USB interface to claim</param>
     /// <returns>A task representing the asynchronous operation</returns>
-    Task ClaimInterfaceAsync(IUsbInterface usbInterface);
+    Task<bool> ClaimInterfaceAsync(IUsbInterface usbInterface);
 
     /// <summary>
     ///     Releases the specified USB interface.
     /// </summary>
     /// <param name="usbInterface">The USB interface to release</param>
-    void ReleaseInterface(IUsbInterface usbInterface);
+    bool ReleaseInterface(IUsbInterface usbInterface);
 
     /// <summary>
     ///     Asynchronously releases the specified USB interface.
     /// </summary>
     /// <param name="usbInterface">The USB interface to release</param>
     /// <returns>A task representing the asynchronous operation</returns>
-    Task ReleaseInterfaceAsync(IUsbInterface usbInterface);
+    Task<bool> ReleaseInterfaceAsync(IUsbInterface usbInterface);
 
     /// <summary>
     ///     Creates a new USB request object.
