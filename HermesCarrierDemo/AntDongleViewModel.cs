@@ -49,7 +49,12 @@ public partial class AntDongleViewModel : ObservableObject
             await mTransmitter.CloseChannelAsync(mChannel);
 
         Console.WriteLine("Opening ANT transmitter...");
-        mChannel = new Channel(0, 1, ChannelType.TransmitChannel, ExtendedAssignmentType.UNKNOWN, 0x2000,
+        mChannel = new Channel(
+            0,
+            1,
+            ChannelType.TransmitChannel,
+            ExtendedAssignmentType.UNKNOWN,
+            0x2000,
             0x03);
 
         Console.WriteLine("Opening ANT channel...");
@@ -69,8 +74,7 @@ public partial class AntDongleViewModel : ObservableObject
         Console.WriteLine("Opening ANT device 3...");
         AntVersion = mTransmitter.AntVersion;
         SerialNumber = mTransmitter.SerialNumber;
-        Capabilities = mTransmitter.Capabilities
-            .Select(capability => Enum.GetName(capability) ?? "Unknown" + $" ({(byte)capability:X2})")
+        Capabilities = mTransmitter.Capabilities.Select(capability => Enum.GetName(capability) ?? "Unknown" + $" ({(byte)capability:X2})")
             .Aggregate((a, b) => $"{a}\n{b}");
     }
 

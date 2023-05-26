@@ -107,7 +107,6 @@ public class Channel : IAntChannel
     /// <inheritdoc />
     public async Task<IAntMessage> AwaitMessageAsync(IAntMessage message)
     {
-        Console.WriteLine("Awaiting message");
         if (mTransmitter == null)
             throw new InvalidOperationException("Channel is not open");
 

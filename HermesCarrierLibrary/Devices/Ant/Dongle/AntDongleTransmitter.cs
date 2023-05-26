@@ -12,8 +12,7 @@ namespace HermesCarrierLibrary.Devices.Ant.Dongle;
 
 public class AntDongleTransmitter : IAntTransmitter
 {
-    private readonly IDictionary<IAntMessage, TaskCompletionSource<IAntMessage>>
-        mAwaitingMessages = new Dictionary<IAntMessage, TaskCompletionSource<IAntMessage>>();
+    private readonly IDictionary<IAntMessage, TaskCompletionSource<IAntMessage>> mAwaitingMessages = new Dictionary<IAntMessage, TaskCompletionSource<IAntMessage>>();
 
     private readonly IUsbDevice mDevice;
 
@@ -86,9 +85,7 @@ public class AntDongleTransmitter : IAntTransmitter
         mUsbRequestIn.Initialize(mDevice, mReadEndpoint);
         IsConnected = true;
 
-        mTransmitterStatusChangedEventManager.HandleEvent(this,
-            new AntTransmitterStatusChangedEventArgs(this, Status.Connected),
-            nameof(OpenAsync));
+        mTransmitterStatusChangedEventManager.HandleEvent(this, new AntTransmitterStatusChangedEventArgs(this, Status.Connected), nameof(OpenAsync));
 
         Start();
 
@@ -100,15 +97,16 @@ public class AntDongleTransmitter : IAntTransmitter
     {
         IsConnected = false;
 
+        // Wait for the read thread to finish
+        Thread.Sleep(1000);
+
         mUsbRequestIn?.Close();
         mUsbRequestIn = null;
 
         mDevice?.Close();
         IsConnected = false;
 
-        mTransmitterStatusChangedEventManager.HandleEvent(this,
-            new AntTransmitterStatusChangedEventArgs(this, Status.Disconnected),
-            nameof(CloseAsync));
+        mTransmitterStatusChangedEventManager.HandleEvent(this, new AntTransmitterStatusChangedEventArgs(this, Status.Disconnected), nameof(CloseAsync));
 
         mLogger.LogInformation("ANT+ Dongle disconnected successfully ({0})", mDevice.DeviceName);
         return Task.CompletedTask;
@@ -169,7 +167,7 @@ public class AntDongleTransmitter : IAntTransmitter
     {
         if (!IsConnected)
             throw new Exception("Cannot send message because the transmitter is not connected");
-        
+
         var data = message.Encode();
         var transfer = new UsbBulkTransfer(mWriteEndpoint, data, data.Length, 1000);
         await mDevice.BulkTransferAsync(transfer);
@@ -180,7 +178,7 @@ public class AntDongleTransmitter : IAntTransmitter
     {
         if (!IsConnected)
             throw new Exception("Cannot await message because the transmitter is not connected");
-        
+
         var tcs = new TaskCompletionSource<IAntMessage>();
         mAwaitingMessages.Add(message, tcs);
 
@@ -195,14 +193,15 @@ public class AntDongleTransmitter : IAntTransmitter
     {
         if (!IsConnected)
             throw new Exception("Cannot await message because the transmitter is not connected");
-        
-        return Task.Run(() =>
-        {
-            var response = AwaitMessageAsync(message);
-            if (response.Result is T t) return t;
 
-            throw new Exception("Message type mismatch");
-        });
+        return Task.Run(
+            () =>
+            {
+                var response = AwaitMessageAsync(message);
+                if (response.Result is T t) return t;
+
+                throw new Exception("Message type mismatch");
+            });
     }
 
     /// <inheritdoc />
@@ -210,7 +209,7 @@ public class AntDongleTransmitter : IAntTransmitter
     {
         if (!IsConnected)
             throw new Exception("Cannot receive message because the transmitter is not connected");
-        
+
         var message = DecodeMessage(data);
         if (message is not UnknownMessage) message.Decode(data);
 
@@ -229,14 +228,15 @@ public class AntDongleTransmitter : IAntTransmitter
         mReadThread = new Thread(async () => { await StartReadThread(); });
         mReadThread.Start();
 
-        Task.Run(async () =>
-        {
-            Thread.Sleep(100);
+        Task.Run(
+            async () =>
+            {
+                Thread.Sleep(100);
 
-            await SendMessageAsync(new RequestMessage(RequestMessageType.ANT_VERSION));
-            await SendMessageAsync(new RequestMessage(RequestMessageType.SERIAL_NUMBER));
-            await SendMessageAsync(new RequestMessage(RequestMessageType.CAPABILITIES));
-        });
+                await SendMessageAsync(new RequestMessage(RequestMessageType.ANT_VERSION));
+                await SendMessageAsync(new RequestMessage(RequestMessageType.SERIAL_NUMBER));
+                await SendMessageAsync(new RequestMessage(RequestMessageType.CAPABILITIES));
+            });
     }
 
     private async Task StartReadThread()
@@ -251,8 +251,7 @@ public class AntDongleTransmitter : IAntTransmitter
             {
                 case EventResponseMessage eventResponseMessage:
                 {
-                    var (key, value) = mAwaitingMessages
-                        .FirstOrDefault(x => x.Key.MessageId == eventResponseMessage.OriginalMessage);
+                    var (key, value) = mAwaitingMessages.FirstOrDefault(x => x.Key.MessageId == eventResponseMessage.OriginalMessage);
 
                     if (value != null)
                     {
@@ -267,15 +266,15 @@ public class AntDongleTransmitter : IAntTransmitter
                     AntVersion = versionMessage.Version;
                     break;
                 case SerialNumberMessage serialNumberMessage:
-                    SerialNumber = BitConverter.ToString(serialNumberMessage.SerialNumber).Replace("-", "");
+                    SerialNumber = BitConverter.ToString(serialNumberMessage.SerialNumber)
+                        .Replace("-", "");
                     break;
                 case CapabilitiesMessage capabilitiesMessage:
                     Capabilities = capabilitiesMessage.Capabilities;
                     break;
             }
 
-            mMessageReceivedEventManager.HandleEvent(this, new AntMessageReceivedEventArgs(message),
-                nameof(MessageReceived));
+            mMessageReceivedEventManager.HandleEvent(this, new AntMessageReceivedEventArgs(message), nameof(MessageReceived));
         }
 
         foreach (var channel in ActiveChannels.Values) await CloseChannelAsync(channel);
@@ -308,8 +307,6 @@ public class AntDongleTransmitter : IAntTransmitter
     /// <inheritdoc />
     public override string ToString()
     {
-        return $"{{\"{nameof(SerialNumber)}\":\"{SerialNumber}\"," +
-               $"\"{nameof(AntVersion)}\":\"{AntVersion}\"," +
-               $"\"{nameof(Capabilities)}\":\"{Capabilities}\"}}";
+        return $"{{\"{nameof(SerialNumber)}\":\"{SerialNumber}\"," + $"\"{nameof(AntVersion)}\":\"{AntVersion}\"," + $"\"{nameof(Capabilities)}\":\"{Capabilities}\"}}";
     }
 }
