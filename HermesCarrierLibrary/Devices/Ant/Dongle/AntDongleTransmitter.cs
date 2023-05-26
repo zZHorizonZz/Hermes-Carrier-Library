@@ -93,9 +93,20 @@ public class AntDongleTransmitter : IAntTransmitter
     }
 
     /// <inheritdoc />
-    public Task CloseAsync()
+    public async Task CloseAsync()
     {
+        foreach (var channel in ActiveChannels.Values) await CloseChannelAsync(channel);
+
         IsConnected = false;
+
+        try
+        {
+            mReadThread.Interrupt();
+        }
+        catch (Exception e)
+        {
+            mLogger.LogError(e, "Failed to interrupt read thread");
+        }
 
         // Wait for the read thread to finish
         Thread.Sleep(1000);
@@ -109,7 +120,6 @@ public class AntDongleTransmitter : IAntTransmitter
         mTransmitterStatusChangedEventManager.HandleEvent(this, new AntTransmitterStatusChangedEventArgs(this, Status.Disconnected), nameof(CloseAsync));
 
         mLogger.LogInformation("ANT+ Dongle disconnected successfully ({0})", mDevice.DeviceName);
-        return Task.CompletedTask;
     }
 
     /// <inheritdoc />
@@ -243,41 +253,46 @@ public class AntDongleTransmitter : IAntTransmitter
     {
         while (IsConnected)
         {
-            var data = await Read();
-            if (data == null || data.Length == 0) break;
-
-            var message = await ReceiveMessageAsync(data);
-            switch (message)
+            try
             {
-                case EventResponseMessage eventResponseMessage:
+                var data = await Read();
+                if (data == null || data.Length == 0) break;
+
+                var message = await ReceiveMessageAsync(data);
+                switch (message)
                 {
-                    var (key, value) = mAwaitingMessages.FirstOrDefault(x => x.Key.MessageId == eventResponseMessage.OriginalMessage);
-
-                    if (value != null)
+                    case EventResponseMessage eventResponseMessage:
                     {
-                        mAwaitingMessages.Remove(key);
-                        if (!value.TrySetResult(message))
-                            mLogger.LogWarning("Failed to set result for awaiting message");
+                        var (key, value) = mAwaitingMessages.FirstOrDefault(x => x.Key.MessageId == eventResponseMessage.OriginalMessage);
+
+                        if (value != null)
+                        {
+                            mAwaitingMessages.Remove(key);
+                            if (!value.TrySetResult(message))
+                                mLogger.LogWarning("Failed to set result for awaiting message");
+                        }
+
+                        break;
                     }
-
-                    break;
+                    case AntVersionMessage versionMessage:
+                        AntVersion = versionMessage.Version;
+                        break;
+                    case SerialNumberMessage serialNumberMessage:
+                        SerialNumber = BitConverter.ToString(serialNumberMessage.SerialNumber)
+                            .Replace("-", "");
+                        break;
+                    case CapabilitiesMessage capabilitiesMessage:
+                        Capabilities = capabilitiesMessage.Capabilities;
+                        break;
                 }
-                case AntVersionMessage versionMessage:
-                    AntVersion = versionMessage.Version;
-                    break;
-                case SerialNumberMessage serialNumberMessage:
-                    SerialNumber = BitConverter.ToString(serialNumberMessage.SerialNumber)
-                        .Replace("-", "");
-                    break;
-                case CapabilitiesMessage capabilitiesMessage:
-                    Capabilities = capabilitiesMessage.Capabilities;
-                    break;
+
+                mMessageReceivedEventManager.HandleEvent(this, new AntMessageReceivedEventArgs(message), nameof(MessageReceived));
             }
-
-            mMessageReceivedEventManager.HandleEvent(this, new AntMessageReceivedEventArgs(message), nameof(MessageReceived));
+            catch (Exception e)
+            {
+                mLogger.LogError(e, "Failed to read from ANT+ dongle");
+            }
         }
-
-        foreach (var channel in ActiveChannels.Values) await CloseChannelAsync(channel);
     }
 
     private async Task<byte[]> Read()
