@@ -1,5 +1,6 @@
 ﻿using Android.Content;
 using Android.Hardware.Usb;
+using Android.OS;
 using HermesCarrierLibrary.Devices.Usb;
 
 namespace HermesCarrierLibrary.Platforms.Android.Devices;
@@ -74,7 +75,15 @@ public class DroidUsbService : IUsbService
         filter.AddAction(UsbManager.ActionUsbDeviceAttached);
         filter.AddAction(UsbManager.ActionUsbDeviceDetached);
         filter.AddAction(DroidUsbDevice.ActionUsbPermission);
-        mContext.RegisterReceiver(mUsbBroadcastReceiver, filter);
+
+        if (Build.VERSION.SdkInt >= BuildVersionCodes.Tiramisu)
+        {
+            mContext.RegisterReceiver(mUsbBroadcastReceiver, filter, ReceiverFlags.Exported);
+        }
+        else
+        {
+            mContext.RegisterReceiver(mUsbBroadcastReceiver, filter);
+        }
     }
 
     public void Unregister()
