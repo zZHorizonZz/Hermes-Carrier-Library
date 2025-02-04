@@ -21,13 +21,13 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: 7.0.x
+        dotnet-version: 9.0.x
     - name: Install MAUI
       run: dotnet workload install maui --ignore-failed-sources
     - name: Restore packages
       run: dotnet restore ${{ env.PROJECT_PATH }}      
     - name: Build project
-      run: dotnet build ${{ env.PROJECT_PATH }} --no-restore
+      run: dotnet build ${{ env.PROJECT_PATH }} --no-restore -c Release
     - name: Get Version
       id: version
       uses: battila7/get-version-action@v2
